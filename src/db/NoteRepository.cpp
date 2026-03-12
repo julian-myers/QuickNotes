@@ -98,8 +98,9 @@ std::vector<Model::Note> NotesRepository::collect(Statement &statement) {
 
 NotesRepository::Statement NotesRepository::prepare(const std::string &query) {
   Statement statement;
-  int rc = sqlite3_prepare_v2(m_db, query.c_str(), -1, &statement.statement,
-                              nullptr);
+  int rc = sqlite3_prepare_v2(
+      m_db, query.c_str(), -1, &statement.statement, nullptr
+  );
   if (rc != SQLITE_OK) {
     throw std::runtime_error(sqlite3_errmsg(m_db));
   }

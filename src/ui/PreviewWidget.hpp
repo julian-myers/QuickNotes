@@ -12,8 +12,9 @@ class PreviewWidget : public Widget {
   public:
     /// @brief Constructs a PreviewWidget.
     /// @param window reference to an ncurses window.
-    explicit PreviewWidget(WINDOW *window,
-                           std::shared_ptr<Config::Config> config);
+    explicit PreviewWidget(
+        WINDOW *window, std::shared_ptr<Config::Config> config
+    );
 
     /// @brief draw the window and content.
     void draw() override;

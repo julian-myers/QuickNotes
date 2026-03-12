@@ -13,10 +13,12 @@ namespace QuickNotes::App::State {
 
 // --- Public Methods ---
 
-MainMenuState::MainMenuState(WINDOW *window,
-                             std::shared_ptr<Config::Config> config,
-                             IAppController &controller,
-                             DB::NotesRepository &repository) noexcept
+MainMenuState::MainMenuState(
+    WINDOW *window,
+    std::shared_ptr<Config::Config> config,
+    IAppController &controller,
+    DB::NotesRepository &repository
+) noexcept
     : NoteAwareState(window, config, controller, repository), m_menu(window) {}
 
 void MainMenuState::render() { m_menu.draw(); }
@@ -30,18 +32,14 @@ std::unique_ptr<AbstractState> MainMenuState::handleInput(int key) {
 
   const auto &binds = m_config->keyBinds.bindings;
   auto toAction = [&]() -> MenuAction {
-    if (key == binds.at(Action::MOVE_UP))
-      return MenuAction::MOVE_UP;
-    if (key == binds.at(Action::MOVE_DOWN))
-      return MenuAction::MOVE_DOWN;
+    if (key == binds.at(Action::MOVE_UP)) return MenuAction::MOVE_UP;
+    if (key == binds.at(Action::MOVE_DOWN)) return MenuAction::MOVE_DOWN;
     if (key == binds.at(Action::MAIN_MENU_NOTES))
       return MenuAction::NOTES_SELECTED;
     if (key == binds.at(Action::MAIN_MENU_SETTINGS))
       return MenuAction::SETTINGS_SELECTED;
-    if (key == binds.at(Action::SELECT))
-      return MenuAction::SELECT;
-    if (key == binds.at(Action::QUIT))
-      return MenuAction::QUIT_SELECTED;
+    if (key == binds.at(Action::SELECT)) return MenuAction::SELECT;
+    if (key == binds.at(Action::QUIT)) return MenuAction::QUIT_SELECTED;
     return MenuAction::NONE;
   };
 

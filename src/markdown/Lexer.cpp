@@ -181,12 +181,12 @@ void Lexer::handleTableState(TokenListRef tokens) {
           while (peek() == SPACE || peek() == TAB) {
             advance();
           }
-          if (peek() == NEW_LINE_CHAR || isAtEnd())
-            return;
+          if (peek() == NEW_LINE_CHAR || isAtEnd()) return;
           (peek() == DASH || peek() == COLON) ? readTableDelimiter(tokens)
                                               : readTableCell(tokens);
         }},
-       {[](char) { return true; }, [&]() { readTableCell(tokens); }}}};
+       {[](char) { return true; }, [&]() { readTableCell(tokens); }}}
+  };
   for (auto &[predicate, handler] : rules) {
     if (predicate(c)) {
       handler();
@@ -196,8 +196,7 @@ void Lexer::handleTableState(TokenListRef tokens) {
 }
 
 void Lexer::readNewLine(TokenListRef tokens) {
-  if (isAtEnd() || peek() == NULL_CHAR)
-    return;
+  if (isAtEnd() || peek() == NULL_CHAR) return;
   advance();
   if (peek() == NEW_LINE_CHAR) {
     while (peek() == NEW_LINE_CHAR) {
@@ -346,10 +345,8 @@ void Lexer::readText(TokenListRef tokens) {
   while (!isAtEnd()) {
     char c = peek();
 
-    if (c == NEW_LINE_CHAR || c == NULL_CHAR)
-      break;
-    if (c == ASTERIX || c == BACK_TICK || c == PIPE)
-      break;
+    if (c == NEW_LINE_CHAR || c == NULL_CHAR) break;
+    if (c == ASTERIX || c == BACK_TICK || c == PIPE) break;
 
     text += advance();
   }
@@ -380,8 +377,7 @@ void Lexer::readTableCell(TokenListRef tokens) {
     cell += advance();
 
   size_t end = cell.find_last_not_of(" \t");
-  if (end != std::string::npos)
-    cell = cell.substr(0, end + 1);
+  if (end != std::string::npos) cell = cell.substr(0, end + 1);
 
   if (!cell.empty())
     tokens.push_back(makeToken(TokenType::TEXT, std::move(cell)));

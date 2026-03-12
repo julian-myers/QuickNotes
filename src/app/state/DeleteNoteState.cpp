@@ -9,11 +9,14 @@
 namespace QuickNotes::App::State {
 using ConfigPtr = std::shared_ptr<Config::Config>;
 
-DeleteNoteState::DeleteNoteState(WINDOW *window, ConfigPtr config,
-                                 IAppController &controller,
-                                 DB::NotesRepository &repository,
-                                 std::vector<Model::Note> &notes,
-                                 int selectedIndex)
+DeleteNoteState::DeleteNoteState(
+    WINDOW *window,
+    ConfigPtr config,
+    IAppController &controller,
+    DB::NotesRepository &repository,
+    std::vector<Model::Note> &notes,
+    int selectedIndex
+)
     : NoteAwareState(window, config, controller, repository), m_notes(notes),
       m_note(m_notes[selectedIndex]), m_selectedIndex(selectedIndex) {}
 
@@ -27,10 +30,8 @@ std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
   auto toAction = [&]() -> DeleteConfirmAction {
-    if (key == binds.at(Action::NO))
-      return DeleteConfirmAction::CANCEL;
-    if (key == binds.at(Action::YES))
-      return DeleteConfirmAction::CONFIRM;
+    if (key == binds.at(Action::NO)) return DeleteConfirmAction::CANCEL;
+    if (key == binds.at(Action::YES)) return DeleteConfirmAction::CONFIRM;
     return DeleteConfirmAction::NONE;
   };
   switch (toAction()) {

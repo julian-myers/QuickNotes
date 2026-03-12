@@ -13,8 +13,9 @@ using ConfigPtr = std::shared_ptr<Config::Config>;
 class NoteViewWidget : public Widget {
 
   public:
-    explicit NoteViewWidget(WINDOW *window, ConfigPtr config,
-                            Model::Note &note);
+    explicit NoteViewWidget(
+        WINDOW *window, ConfigPtr config, Model::Note &note
+    );
     ~NoteViewWidget();
     void draw() override;
 

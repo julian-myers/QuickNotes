@@ -26,14 +26,19 @@ void NoteListWidget::draw(std::vector<Model::Note> notes) {
   mvwhline(m_window, HEADER_ROW + 1, 0, ACS_HLINE, m_windowWidth);
   for (int i = 0; i < static_cast<int>(notes.size()); i++) {
     int row = LIST_START_ROW + i;
-    if (row >= m_windowHeight - 1)
-      break;
+    if (row >= m_windowHeight - 1) break;
     if (i == m_selectedIndex) {
       wattron(m_window, A_REVERSE);
     }
 
-    mvwprintw(m_window, row, MARGIN, "%-*s", m_windowWidth - (MARGIN * 2),
-              notes[i].title.c_str());
+    mvwprintw(
+        m_window,
+        row,
+        MARGIN,
+        "%-*s",
+        m_windowWidth - (MARGIN * 2),
+        notes[i].title.c_str()
+    );
     if (i == m_selectedIndex) {
       wattroff(m_window, A_REVERSE);
     }

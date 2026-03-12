@@ -37,8 +37,13 @@ void DeleteConfirmWidget::draw(const std::string &title) {
   }
   mvwprintw(m_dialog, 3, MARGIN, "%s \"%s\"", PROMPT, truncated.c_str());
   wattron(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
-  mvwprintw(m_dialog, 5, (DIALOG_WIDTH - static_cast<int>(strlen(OPTIONS))) / 2,
-            "%s", OPTIONS);
+  mvwprintw(
+      m_dialog,
+      5,
+      (DIALOG_WIDTH - static_cast<int>(strlen(OPTIONS))) / 2,
+      "%s",
+      OPTIONS
+  );
   wattroff(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
   wrefresh(m_dialog);
 }

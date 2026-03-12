@@ -15,10 +15,13 @@ class ViewingState : public NoteAwareState {
     using ConfigPtr = std::shared_ptr<Config::Config>;
 
   public:
-    explicit ViewingState(WINDOW *window, ConfigPtr config,
-                          IAppController &controller,
-                          DB::NotesRepository &repository,
-                          Model::Note note) noexcept;
+    explicit ViewingState(
+        WINDOW *window,
+        ConfigPtr config,
+        IAppController &controller,
+        DB::NotesRepository &repository,
+        Model::Note note
+    ) noexcept;
 
     std::unique_ptr<AbstractState> handleInput(int key) override;
 

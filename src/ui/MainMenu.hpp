@@ -68,8 +68,21 @@ class MainMenu : public Widget {
 )";
 
     static constexpr std::array<const char *, 14> TITLE = {
-        LINE_1, LINE_2, LINE_3,  LINE_4,  LINE_5,  LINE_6,  LINE_7,
-        LINE_8, LINE_9, LINE_10, LINE_11, LINE_12, LINE_13, LINE_14};
+        LINE_1,
+        LINE_2,
+        LINE_3,
+        LINE_4,
+        LINE_5,
+        LINE_6,
+        LINE_7,
+        LINE_8,
+        LINE_9,
+        LINE_10,
+        LINE_11,
+        LINE_12,
+        LINE_13,
+        LINE_14
+    };
     static constexpr int TITLE_HEIGHT = 14;
     int m_winHeight, m_winWidth, m_titleWidth, m_startRow, m_startCol;
     std::vector<Model::Note> m_recentNotes;

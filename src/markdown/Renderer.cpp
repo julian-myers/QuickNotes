@@ -45,7 +45,12 @@ void Renderer::visit(const DocumentNode &node) {
 
 void Renderer::visit(const HeadingNode &node) {
   static constexpr std::array<const char *, 6> HEADING_SYMBOLS = {
-      "①", "②", "③", "④", "⑤", "⑥",
+      "①",
+      "②",
+      "③",
+      "④",
+      "⑤",
+      "⑥",
   };
   std::string prefix(node.level - 1, ' ');
   prefix += HEADING_SYMBOLS[node.level - 1];
@@ -111,8 +116,9 @@ void Renderer::visit(const CodeBlockNode &node) {
   }
   wattron(m_window, COLOR_PAIR(PAIR_CODE_BLOCK));
   for (const auto &codeLine : lines) {
-    mvwprintw(m_window, m_currentRow, COLUMN_START, "%-*s", width,
-              codeLine.c_str());
+    mvwprintw(
+        m_window, m_currentRow, COLUMN_START, "%-*s", width, codeLine.c_str()
+    );
     m_currentRow++;
   }
   wattroff(m_window, COLOR_PAIR(PAIR_CODE_BLOCK));
@@ -172,13 +178,11 @@ void Renderer::visit(const TableNode &node) {
 
   for (const auto &rowPtr : node.rows) {
     const auto *row = dynamic_cast<const TableRowNode *>(rowPtr.get());
-    if (!row)
-      continue;
+    if (!row) continue;
     for (size_t i = 0; i < row->cells.size(); i++) {
       const auto *cell =
           dynamic_cast<const TableCellNode *>(row->cells[i].get());
-      if (!cell)
-        continue;
+      if (!cell) continue;
       int width = static_cast<int>(cellText(*cell).size());
       if (i >= m_columnWidths.size()) {
         m_columnWidths.push_back(width);
@@ -194,8 +198,12 @@ void Renderer::visit(const TableNode &node) {
     for (size_t i = 0; i < m_columnWidths.size(); i++) {
       mvwhline(m_window, m_currentRow, col, ACS_HLINE, m_columnWidths[i] + 2);
       col += m_columnWidths[i] + 2;
-      mvwaddch(m_window, m_currentRow, col,
-               i < m_columnWidths.size() - 1 ? mid : right);
+      mvwaddch(
+          m_window,
+          m_currentRow,
+          col,
+          i < m_columnWidths.size() - 1 ? mid : right
+      );
       col++;
     }
     wattroff(m_window, COLOR_PAIR(PAIR_TABLE_BORDERS));
@@ -231,8 +239,12 @@ void Renderer::visit(const TableRowNode &node) {
     for (size_t i = 0; i < m_columnWidths.size(); i++) {
       mvwhline(m_window, m_currentRow, col, ACS_HLINE, m_columnWidths[i] + 2);
       col += m_columnWidths[i] + 2;
-      mvwaddch(m_window, m_currentRow, col,
-               i < m_columnWidths.size() - 1 ? ACS_PLUS : ACS_RTEE);
+      mvwaddch(
+          m_window,
+          m_currentRow,
+          col,
+          i < m_columnWidths.size() - 1 ? ACS_PLUS : ACS_RTEE
+      );
       col++;
     }
     wattroff(m_window, COLOR_PAIR(PAIR_TABLE_BORDERS));
@@ -273,13 +285,25 @@ void Renderer::visit(const TableCellNode &node) {
   }
   int pair = m_inTableHeader ? PAIR_TABLE_HEADER : PAIR_TABLE_BODY;
   wattron(m_window, COLOR_PAIR(pair));
-  mvwprintw(m_window, m_currentRow, colStart, "%*s%s%*s", leftPad, "",
-            text.c_str(), rightPad, "");
+  mvwprintw(
+      m_window,
+      m_currentRow,
+      colStart,
+      "%*s%s%*s",
+      leftPad,
+      "",
+      text.c_str(),
+      rightPad,
+      ""
+  );
   wattroff(m_window, COLOR_PAIR(pair));
   wattron(m_window, COLOR_PAIR(PAIR_TABLE_BORDERS));
-  mvwaddch(m_window, m_currentRow,
-           colStart + leftPad + static_cast<int>(text.size()) + rightPad,
-           ACS_VLINE);
+  mvwaddch(
+      m_window,
+      m_currentRow,
+      colStart + leftPad + static_cast<int>(text.size()) + rightPad,
+      ACS_VLINE
+  );
   wattroff(m_window, COLOR_PAIR(PAIR_TABLE_BORDERS));
   m_currentCell++;
 }

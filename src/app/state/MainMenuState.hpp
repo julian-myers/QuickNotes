@@ -25,10 +25,12 @@ class MainMenuState : public NoteAwareState {
     /// @brief Constructs a MainMenuState.
     /// @param window pointer to the ncurses window this state renders in
     /// @param config shared pointer to the application configuration.
-    explicit MainMenuState(WINDOW *window,
-                           std::shared_ptr<Config::Config> config,
-                           IAppController &controller,
-                           DB::NotesRepository &repository) noexcept;
+    explicit MainMenuState(
+        WINDOW *window,
+        std::shared_ptr<Config::Config> config,
+        IAppController &controller,
+        DB::NotesRepository &repository
+    ) noexcept;
 
     /// @brief Maps key/user input to semantic action to which informs widget
     /// which action to execute/respond to.

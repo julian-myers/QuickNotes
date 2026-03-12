@@ -17,9 +17,12 @@
 namespace QuickNotes::App::State {
 using ConfigPtr = std::shared_ptr<Config::Config>;
 
-NoteListState::NoteListState(WINDOW *window, ConfigPtr config,
-                             IAppController &controller,
-                             DB::NotesRepository &repository) noexcept
+NoteListState::NoteListState(
+    WINDOW *window,
+    ConfigPtr config,
+    IAppController &controller,
+    DB::NotesRepository &repository
+) noexcept
     : NoteAwareState(window, config, controller, repository),
       m_selectedIndex(0), m_listWindow(nullptr), m_previewWindow(nullptr) {}
 
@@ -46,22 +49,14 @@ std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
   auto toAction = [&]() -> ListActions {
-    if (key == binds.at(Action::MOVE_UP))
-      return ListActions::MOVE_UP;
-    if (key == binds.at(Action::MOVE_DOWN))
-      return ListActions::MOVE_DOWN;
-    if (key == binds.at(Action::MOVE_RIGHT))
-      return ListActions::VIEW_NOTE;
-    if (key == binds.at(Action::SELECT))
-      return ListActions::SELECT;
-    if (key == binds.at(Action::SEARCH))
-      return ListActions::SEARCH;
-    if (key == binds.at(Action::NEW_NOTE))
-      return ListActions::NEW_NOTE;
-    if (key == binds.at(Action::DELETE_NOTE))
-      return ListActions::DELETE_NOTE;
-    if (key == binds.at(Action::QUIT))
-      return ListActions::QUIT;
+    if (key == binds.at(Action::MOVE_UP)) return ListActions::MOVE_UP;
+    if (key == binds.at(Action::MOVE_DOWN)) return ListActions::MOVE_DOWN;
+    if (key == binds.at(Action::MOVE_RIGHT)) return ListActions::VIEW_NOTE;
+    if (key == binds.at(Action::SELECT)) return ListActions::SELECT;
+    if (key == binds.at(Action::SEARCH)) return ListActions::SEARCH;
+    if (key == binds.at(Action::NEW_NOTE)) return ListActions::NEW_NOTE;
+    if (key == binds.at(Action::DELETE_NOTE)) return ListActions::DELETE_NOTE;
+    if (key == binds.at(Action::QUIT)) return ListActions::QUIT;
     return ListActions::NONE;
   };
 
@@ -73,24 +68,35 @@ std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
       moveDown();
       return nullptr;
     case ListActions::VIEW_NOTE:
-      return std::make_unique<ViewingState>(m_window, m_config, m_controller,
-                                            m_repository,
-                                            m_notes[m_selectedIndex]);
-    case ListActions::SELECT: {
-      Model::Note &note = m_notes[m_selectedIndex];
-      note.content = Config::Editor::openEditor(note.content);
-      auto result = m_repository.update(note);
-      return nullptr;
-    };
+      return std::make_unique<ViewingState>(
+          m_window,
+          m_config,
+          m_controller,
+          m_repository,
+          m_notes[m_selectedIndex]
+      );
+    case ListActions::SELECT:
+      {
+        Model::Note &note = m_notes[m_selectedIndex];
+        note.content = Config::Editor::openEditor(note.content);
+        auto result = m_repository.update(note);
+        return nullptr;
+      };
     case ListActions::SEARCH:
       return nullptr;
     case ListActions::NEW_NOTE:
-      return std::make_unique<NewNoteState>(m_window, m_config, m_controller,
-                                            m_repository, m_notes);
+      return std::make_unique<NewNoteState>(
+          m_window, m_config, m_controller, m_repository, m_notes
+      );
     case ListActions::DELETE_NOTE:
-      return std::make_unique<DeleteNoteState>(m_window, m_config, m_controller,
-                                               m_repository, m_notes,
-                                               m_selectedIndex);
+      return std::make_unique<DeleteNoteState>(
+          m_window,
+          m_config,
+          m_controller,
+          m_repository,
+          m_notes,
+          m_selectedIndex
+      );
     case ListActions::QUIT:
       m_controller.quit();
       return nullptr;
@@ -116,8 +122,7 @@ void NoteListState::moveUp() {
 }
 
 void NoteListState::moveDown() {
-  if (m_notes.empty())
-    return;
+  if (m_notes.empty()) return;
   m_selectedIndex =
       std::min(static_cast<int>(m_notes.size()) - 1, m_selectedIndex + 1);
 }
@@ -133,9 +138,13 @@ void NoteListState::createWindow() {
   int listStart = 0;
   int margin = 2;
   m_listWindow = derwin(m_window, height, listWidth, listStart, listStart);
-  m_previewWindow =
-      derwin(m_window, height - (margin * 2), previewWidth - (margin * 2),
-             listStart + margin, listWidth + margin);
+  m_previewWindow = derwin(
+      m_window,
+      height - (margin * 2),
+      previewWidth - (margin * 2),
+      listStart + margin,
+      listWidth + margin
+  );
   m_list = std::make_unique<UI::NoteListWidget>(m_listWindow);
   m_preview = std::make_unique<UI::PreviewWidget>(m_previewWindow, m_config);
 }

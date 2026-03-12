@@ -70,8 +70,9 @@ void Parser::dispatch(AST &tree) {
       advance();
       continue;
     }
-    auto rule = std::ranges::find_if(
-        m_rules, [&](const auto &r) { return r.first == current; });
+    auto rule = std::ranges::find_if(m_rules, [&](const auto &r) {
+      return r.first == current;
+    });
     if (rule != m_rules.end()) {
       tree.root->children.push_back(rule->second());
     } else {
@@ -187,15 +188,12 @@ std::unique_ptr<CodeBlockNode> Parser::parseCodeBlock() {
 std::unique_ptr<TableNode> Parser::parseTable() {
   auto node = std::make_unique<TableNode>();
   node->rows.push_back(parseTableRow(true));
-  if (!isAtEnd() && peek().type == TokenType::NEWLINE)
-    advance();
+  if (!isAtEnd() && peek().type == TokenType::NEWLINE) advance();
   node->columnAlignments = parseTableAlignments();
-  if (!isAtEnd() && peek().type == TokenType::NEWLINE)
-    advance();
+  if (!isAtEnd() && peek().type == TokenType::NEWLINE) advance();
   while (!isAtEnd() && peek().type == TokenType::TABLE_PIPE) {
     node->rows.push_back(parseTableRow(false));
-    if (!isAtEnd() && peek().type == TokenType::NEWLINE)
-      advance();
+    if (!isAtEnd() && peek().type == TokenType::NEWLINE) advance();
   }
   return node;
 }
@@ -235,12 +233,9 @@ std::vector<ColumnAlignment> Parser::parseTableAlignments() {
 ColumnAlignment Parser::parseAlignment(const std::string &delimiter) {
   bool left = delimiter.front() == ':';
   bool right = delimiter.back() == ':';
-  if (left && right)
-    return ColumnAlignment::CENTER;
-  if (left)
-    return ColumnAlignment::LEFT;
-  if (right)
-    return ColumnAlignment::RIGHT;
+  if (left && right) return ColumnAlignment::CENTER;
+  if (left) return ColumnAlignment::LEFT;
+  if (right) return ColumnAlignment::RIGHT;
   return ColumnAlignment::NONE;
 }
 

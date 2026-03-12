@@ -14,9 +14,14 @@ class DeleteNoteState : public NoteAwareState {
     using ConfigPtr = std::shared_ptr<Config::Config>;
 
   public:
-    DeleteNoteState(WINDOW *window, ConfigPtr config,
-                    IAppController &controller, DB::NotesRepository &repository,
-                    std::vector<Model::Note> &notes, int selectedIndex);
+    DeleteNoteState(
+        WINDOW *window,
+        ConfigPtr config,
+        IAppController &controller,
+        DB::NotesRepository &repository,
+        std::vector<Model::Note> &notes,
+        int selectedIndex
+    );
 
     std::unique_ptr<AbstractState> handleInput(int key) override;
     void render() override;

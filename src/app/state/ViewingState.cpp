@@ -11,10 +11,13 @@ namespace QuickNotes::App::State {
 
 using ConfigPtr = std::shared_ptr<Config::Config>;
 
-ViewingState::ViewingState(WINDOW *window, ConfigPtr config,
-                           IAppController &controller,
-                           DB::NotesRepository &repository,
-                           Model::Note note) noexcept
+ViewingState::ViewingState(
+    WINDOW *window,
+    ConfigPtr config,
+    IAppController &controller,
+    DB::NotesRepository &repository,
+    Model::Note note
+) noexcept
     : NoteAwareState(window, config, controller, repository), m_note(note) {}
 
 void ViewingState::onEnter() {
@@ -52,14 +55,10 @@ std::unique_ptr<AbstractState> ViewingState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
   auto toAction = [&]() -> ViewActions {
-    if (key == binds.at(Action::MOVE_UP))
-      return ViewActions::SCROLL_UP;
-    if (key == binds.at(Action::MOVE_DOWN))
-      return ViewActions::SCROLL_DOWN;
-    if (key == binds.at(Action::VIEW_EDIT))
-      return ViewActions::EDIT;
-    if (key == binds.at(Action::ESCAPE))
-      return ViewActions::BACK;
+    if (key == binds.at(Action::MOVE_UP)) return ViewActions::SCROLL_UP;
+    if (key == binds.at(Action::MOVE_DOWN)) return ViewActions::SCROLL_DOWN;
+    if (key == binds.at(Action::VIEW_EDIT)) return ViewActions::EDIT;
+    if (key == binds.at(Action::ESCAPE)) return ViewActions::BACK;
     return ViewActions::NONE;
   };
 
@@ -70,13 +69,14 @@ std::unique_ptr<AbstractState> ViewingState::handleInput(int key) {
     case ViewActions::SCROLL_DOWN:
       moveDown();
       return nullptr;
-    case ViewActions::EDIT: {
-      m_note.content = Config::Editor::openEditor(m_note.content);
-      auto result = m_repository.update(m_note);
-      wclear(m_pad);
-      m_widget->draw();
-      return nullptr;
-    };
+    case ViewActions::EDIT:
+      {
+        m_note.content = Config::Editor::openEditor(m_note.content);
+        auto result = m_repository.update(m_note);
+        wclear(m_pad);
+        m_widget->draw();
+        return nullptr;
+      };
     case ViewActions::BACK:
       m_controller.popState();
       return nullptr;

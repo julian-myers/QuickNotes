@@ -15,9 +15,11 @@ NCursesRGB hexToRGB(const std::string &hex) {
   int r = std::stoi(h.substr(R_POS, SUBSTRING_LENGTH), nullptr, BASE);
   int g = std::stoi(h.substr(G_POS, SUBSTRING_LENGTH), nullptr, BASE);
   int b = std::stoi(h.substr(B_POS, SUBSTRING_LENGTH), nullptr, BASE);
-  return {(r * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR,
-          (g * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR,
-          (b * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR};
+  return {
+      (r * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR,
+      (g * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR,
+      (b * SCALE_UP_FACTOR) / SCALE_DOWN_FACTOR
+  };
 }
 
 void initColorPairs(const Config::Config &config) {
@@ -40,8 +42,9 @@ void initColorPairs(const Config::Config &config) {
   defineColor(COLOR_CODE_BLOCK_FG, config.colors.codeBlockfg);
   defineColor(COLOR_CODE_BLOCK_BG, config.colors.codeBlockbg);
   defineColor(COLOR_HORIZONTAL_RULE_FG, config.colors.horizontalRulefg);
-  defineColor(COLOR_BLOCK_QUOTE_LEFT_BORDER_FG,
-              config.colors.blockQuoteLeftBorderfg);
+  defineColor(
+      COLOR_BLOCK_QUOTE_LEFT_BORDER_FG, config.colors.blockQuoteLeftBorderfg
+  );
   defineColor(COLOR_LIST_BULLETS_FG, config.colors.listBulletsfg);
   defineColor(COLOR_LIST_NUMBERS_FG, config.colors.listNumberfg);
   defineColor(COLOR_TABLE_BORDERS_FG, config.colors.tableBorders);
@@ -61,8 +64,11 @@ void initColorPairs(const Config::Config &config) {
   init_pair(PAIR_BOLD_ITALIC, COLOR_BOLD_ITALIC_FG, COLOR_TEXT_BG);
   init_pair(PAIR_INLINE_CODE, COLOR_INLINE_CODE_FG, COLOR_INLINE_CODE_BG);
   init_pair(PAIR_CODE_BLOCK, COLOR_CODE_BLOCK_FG, COLOR_CODE_BLOCK_BG);
-  init_pair(PAIR_BLOCK_QUOTE_LEFT_BORDER, COLOR_BLOCK_QUOTE_LEFT_BORDER_FG,
-            COLOR_TEXT_BG);
+  init_pair(
+      PAIR_BLOCK_QUOTE_LEFT_BORDER,
+      COLOR_BLOCK_QUOTE_LEFT_BORDER_FG,
+      COLOR_TEXT_BG
+  );
   init_pair(PAIR_HORIZONTAL_RULE, COLOR_HORIZONTAL_RULE_FG, COLOR_TEXT_BG);
   init_pair(PAIR_LIST_BULLETS, COLOR_LIST_BULLETS_FG, COLOR_TEXT_BG);
   init_pair(PAIR_LIST_NUMBERS, COLOR_LIST_NUMBERS_FG, COLOR_TEXT_BG);

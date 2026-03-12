@@ -20,9 +20,12 @@ class NoteListState : public NoteAwareState {
     /// @brief Constructs a NoteListState
     /// @param window Instance of ncurses window.
     /// @param config
-    explicit NoteListState(WINDOW *window, ConfigPtr config,
-                           IAppController &controller,
-                           DB::NotesRepository &repository) noexcept;
+    explicit NoteListState(
+        WINDOW *window,
+        ConfigPtr config,
+        IAppController &controller,
+        DB::NotesRepository &repository
+    ) noexcept;
 
     /// @brief Handle user input
     /// @param key user pressed key.

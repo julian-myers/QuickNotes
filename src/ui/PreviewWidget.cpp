@@ -9,8 +9,9 @@
 
 namespace QuickNotes::UI {
 
-PreviewWidget::PreviewWidget(WINDOW *window,
-                             std::shared_ptr<Config::Config> config)
+PreviewWidget::PreviewWidget(
+    WINDOW *window, std::shared_ptr<Config::Config> config
+)
     : Widget(window), m_config(config) {}
 
 void PreviewWidget::draw(Model::Note &note) {

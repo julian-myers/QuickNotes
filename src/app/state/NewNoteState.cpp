@@ -12,11 +12,13 @@ namespace QuickNotes::App::State {
 
 using namespace DB;
 
-NewNoteState::NewNoteState(WINDOW *window,
-                           std::shared_ptr<Config::Config> config,
-                           IAppController &controller,
-                           NotesRepository &repository,
-                           std::vector<Model::Note> &notes) noexcept
+NewNoteState::NewNoteState(
+    WINDOW *window,
+    std::shared_ptr<Config::Config> config,
+    IAppController &controller,
+    NotesRepository &repository,
+    std::vector<Model::Note> &notes
+) noexcept
     : NoteAwareState(window, config, controller, repository), m_notes(notes),
       m_addNoteWidget(std::make_unique<UI::AddNoteWidget>(window)) {}
 
@@ -30,10 +32,8 @@ std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
   auto toAction = [&]() -> NewNoteAction {
-    if (key == binds.at(Action::ESCAPE))
-      return NewNoteAction::CANCEL;
-    if (key == binds.at(Action::SELECT))
-      return NewNoteAction::CONFIRM;
+    if (key == binds.at(Action::ESCAPE)) return NewNoteAction::CANCEL;
+    if (key == binds.at(Action::SELECT)) return NewNoteAction::CONFIRM;
     return NewNoteAction::NONE;
   };
   switch (toAction()) {

@@ -20,11 +20,13 @@ class NewNoteState : public NoteAwareState {
     /// @param config std::shared_ptr<Config::Config> to global config.
     /// @param controller Reference to instance of IAppController.
     /// @param notes Reference to instance of Model::Note.
-    explicit NewNoteState(WINDOW *window,
-                          std::shared_ptr<Config::Config> config,
-                          IAppController &controller,
-                          DB::NotesRepository &repository,
-                          std::vector<Model::Note> &notes) noexcept;
+    explicit NewNoteState(
+        WINDOW *window,
+        std::shared_ptr<Config::Config> config,
+        IAppController &controller,
+        DB::NotesRepository &repository,
+        std::vector<Model::Note> &notes
+    ) noexcept;
 
     void onEnter() override;
     void onExit() override;
