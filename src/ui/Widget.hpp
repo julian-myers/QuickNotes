@@ -4,38 +4,52 @@
 
 namespace QuickNotes::UI {
 
-/// @brief Abstract class from which UI elements will inherit.
+/// @brief Abstract class for all UI components.
 ///
-/// Enforces implementation of the draw() method while handleInput() and
+/// Widgets should be purely presentational and only own the rendering logic.
+/// Concrete widgets receive data via setters before draw() is called.
+///
+/// @note Enforces implementation of the draw() method while handleInput() and
 /// resize() are optional overrides.
+///
+/// @see Subwindow
+/// @see DialogWidget
 class Widget {
 
   public:
     /// @brief Constructs a widget.
-    /// @param window a pointer to an instance of an ncurses WINDOW.
+    /// @param window Pointer to the ncurses window this renders into.
     explicit Widget(WINDOW *window) : m_window(window) {}
 
-    /// @brief Deconstructor.
+    /// @brief Virtual destructor.
     virtual ~Widget() = default;
 
-    /// @breif Pure virtual method that defines how the window should draw its
-    /// contents.
+    /// @brief Render the widget's contents to m_window.
     virtual void draw() = 0;
 
-    /// @breif Virtual method where implementations should define how to handle
-    /// user input.
+    /// @brief Respond to a terminal Resize event.
     ///
-    /// @param key integer key mapping.
-    virtual bool handleInput(int key) { return false; }
-
-    /// @brief Virtual method where implementations determine how a
-    /// window/widget should be resized.
+    /// The default implementation replaces m_window with the resized window.
+    /// Subclasses that contain subwindows should override to recreate them as
+    /// well.
     ///
-    /// @param window A pointer to an instance of an ncurses WINDOW.
+    /// @param window Pointer to the resized ncurses WINDOW.
     virtual void resize(WINDOW *window) { m_window = window; }
 
   protected:
     WINDOW *m_window;
+
+    static void roundedBox(WINDOW *win) {
+      static const cchar_t ls = {0, L"│"};
+      static const cchar_t rs = {0, L"│"};
+      static const cchar_t ts = {0, L"─"};
+      static const cchar_t bs = {0, L"─"};
+      static const cchar_t tl = {0, L"╭"};
+      static const cchar_t tr = {0, L"╮"};
+      static const cchar_t bl = {0, L"╰"};
+      static const cchar_t br = {0, L"╯"};
+      wborder_set(win, &ls, &rs, &ts, &bs, &tl, &tr, &bl, &br);
+    }
 };
 
 } // namespace QuickNotes::UI

@@ -7,8 +7,11 @@
 #include "models/Notes.hpp"
 #include "ui/NoteListWidget.hpp"
 #include "ui/PreviewWidget.hpp"
+#include "ui/StatusBar.hpp"
+#include "ui/Subwindow.hpp"
 #include <memory>
 #include <ncurses.h>
+#include <string_view>
 
 namespace QuickNotes::App::State {
 
@@ -43,7 +46,9 @@ class NoteListState : public NoteAwareState {
     std::string name() const override { return "NoteListState"; }
 
   private:
-    enum class ListActions {
+    enum class Mode { NORMAL, SEARCH, EDIT };
+
+    enum class NormalAction {
       MOVE_UP,
       MOVE_DOWN,
       VIEW_NOTE,
@@ -55,14 +60,26 @@ class NoteListState : public NoteAwareState {
       NONE,
     };
 
-    WINDOW *m_listWindow;
-    WINDOW *m_previewWindow;
+    Mode m_mode = Mode::NORMAL;
     int m_selectedIndex;
+    std::string m_inputBuffer;
+    std::vector<Model::Note> m_filtered;
+    std::unique_ptr<UI::SubWindow> m_listWindow;
+    std::unique_ptr<UI::SubWindow> m_previewWindow;
+    std::unique_ptr<UI::StatusBar> m_statusBar;
     std::unique_ptr<UI::NoteListWidget> m_list;
     std::unique_ptr<UI::PreviewWidget> m_preview;
     std::vector<Model::Note> m_notes;
-    using Binding = std::pair<Config::Action, ListActions>;
+    using Binding = std::pair<Config::Action, NormalAction>;
     static const std::vector<Binding> m_keyMap;
+
+    std::unique_ptr<AbstractState> handleNormal(int key);
+
+    std::unique_ptr<AbstractState> handleSearch(int key);
+
+    std::unique_ptr<AbstractState> handleEdit(int key);
+
+    std::string_view modeLabel() const;
 
     void moveUp() override;
 

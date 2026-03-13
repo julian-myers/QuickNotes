@@ -63,6 +63,8 @@ set(UI_SOURCES
 	src/ui/AddNoteWidget.cpp
 	src/ui/NoteViewWidget.cpp
 	src/ui/DeleteConfirmWidget.cpp
+	src/ui/DialogBox.cpp
+	src/ui/StatusBar.cpp
 )
 
 set(DB_SOURCES

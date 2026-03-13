@@ -1,51 +1,49 @@
 #include "DeleteConfirmWidget.hpp"
 #include "markdown/Colors.hpp"
 #include "ncurses.h"
-#include "ui/Widget.hpp"
-#include <cstring>
+#include "ui/DialogBox.hpp"
+#include <string_view>
 
 namespace QuickNotes::UI {
 
-DeleteConfirmWidget::DeleteConfirmWidget(WINDOW *window) : Widget(window) {
-  int windowHeight = getmaxy(m_window);
-  int windowWidth = getmaxx(m_window);
-  int subWinYPos = (windowHeight - DIALOG_HEIGHT) / 2;
-  int subWinXPos = (windowWidth - DIALOG_WIDTH) / 2;
-  m_dialog =
-      derwin(m_window, DIALOG_HEIGHT, DIALOG_WIDTH, subWinYPos, subWinXPos);
+DeleteConfirmWidget::DeleteConfirmWidget(WINDOW *parent)
+    : DialogBox(parent, DIALOG_HEIGHT, DIALOG_WIDTH) {}
+
+void DeleteConfirmWidget::setNoteTitle(std::string_view title) {
+  m_noteTitle = title;
 }
 
-DeleteConfirmWidget::~DeleteConfirmWidget() {
-  if (m_dialog) {
-    delwin(m_dialog);
-  }
-}
-
-void DeleteConfirmWidget::draw() { draw(""); }
-
-void DeleteConfirmWidget::draw(const std::string &title) {
-  wclear(m_dialog);
-  box(m_dialog, 0, 0);
-  wattron(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD);
-  mvwprintw(m_dialog, 1, MARGIN, "%s", LABEL);
-  wattroff(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD);
-  mvwhline(m_dialog, 2, 1, ACS_HLINE, DIALOG_WIDTH - 2);
-  std::string truncated = title;
+void DeleteConfirmWidget::draw() {
+  drawChrome(LABEL);
+  WINDOW *win = m_dialog.get();
   int maxTitleWidth = DIALOG_WIDTH - (MARGIN * 2) - 2;
+  std::string truncated = m_noteTitle;
   if (static_cast<int>(truncated.size()) > maxTitleWidth) {
     truncated = truncated.substr(0, maxTitleWidth - 3) + "...";
   }
-  mvwprintw(m_dialog, 3, MARGIN, "%s \"%s\"", PROMPT, truncated.c_str());
-  wattron(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
+
   mvwprintw(
-      m_dialog,
-      5,
-      (DIALOG_WIDTH - static_cast<int>(strlen(OPTIONS))) / 2,
-      "%s",
-      OPTIONS
+      win,
+      3,
+      MARGIN,
+      "%.*s \"%s\"",
+      static_cast<int>(PROMPT.size()),
+      PROMPT.data(),
+      truncated.c_str()
   );
-  wattroff(m_dialog, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
-  wrefresh(m_dialog);
+
+  wattron(win, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
+  mvwprintw(
+      win,
+      5,
+      (DIALOG_WIDTH - static_cast<int>(OPTIONS.size())) / 2,
+      "%.*s",
+      static_cast<int>(OPTIONS.size()),
+      OPTIONS.data()
+  );
+  wattroff(win, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
+
+  wrefresh(win);
 }
 
 } // namespace QuickNotes::UI

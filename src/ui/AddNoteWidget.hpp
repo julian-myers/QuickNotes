@@ -2,25 +2,26 @@
 
 #include "Widget.hpp"
 #include "ncurses.h"
+#include "ui/DialogBox.hpp"
 #include <string>
+#include <string_view>
 
 namespace QuickNotes::UI {
 
-class AddNoteWidget : public Widget {
+class AddNoteWidget : public DialogBox {
 
   public:
-    explicit AddNoteWidget(WINDOW *window);
-    ~AddNoteWidget();
+    explicit AddNoteWidget(WINDOW *parent);
     void draw() override;
-    std::string getInput();
+    void setInputBuffer(std::string_view buffer);
 
   private:
-    static constexpr const char *LABEL = "New Note";
-    static constexpr const char *PROMPT = "Title: ";
+    static constexpr std::string_view LABEL = "New Note";
+    static constexpr std::string_view PROMPT = "Title: ";
     static constexpr int DIALOG_HEIGHT = 5;
     static constexpr int DIALOG_WIDTH = 44;
     static constexpr int MARGIN = 2;
-    WINDOW *m_dialog;
+    std::string m_inputBuffer;
 };
 
 } // namespace QuickNotes::UI

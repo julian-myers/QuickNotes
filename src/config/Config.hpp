@@ -73,6 +73,7 @@ enum class Action {
   SEARCH,
   YES,
   NO,
+  BACKSPACE,
 };
 
 struct KeyBindsConfig {
@@ -95,6 +96,7 @@ struct KeyBindsConfig {
         {Action::ESCAPE, 27},
         {Action::YES, 'y'},
         {Action::NO, 'n'},
+        {Action::BACKSPACE, 127},
     };
 };
 

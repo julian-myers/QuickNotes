@@ -1,8 +1,10 @@
 #include "app/state/NewNoteState.hpp"
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
+#include "config/Config.hpp"
 #include "ncurses.h"
 #include "ui/AddNoteWidget.hpp"
+#include <cctype>
 #include <expected>
 #include <memory>
 #include <vector>
@@ -18,44 +20,66 @@ NewNoteState::NewNoteState(
     INotesRepository &repository,
     std::vector<Model::Note> &notes
 ) noexcept
-    : NoteAwareState(window, config, controller, repository), m_notes(notes),
-      m_addNoteWidget(std::make_unique<UI::AddNoteWidget>(window)) {}
+    : NoteAwareState(window, config, controller, repository), m_notes(notes) {}
 
-void NewNoteState::onEnter() { m_title = m_addNoteWidget->getInput(); }
+void NewNoteState::onEnter() {
+  m_inputBuffer.clear();
+  m_widget = std::make_unique<UI::AddNoteWidget>(m_window);
+  curs_set(1);
+}
 
-void NewNoteState::onExit() { m_addNoteWidget.reset(); }
+void NewNoteState::onExit() {
+  curs_set(0);
+  m_widget.reset();
+  wclear(m_window);
+}
 
-void NewNoteState::render() {}
-
-const std::vector<std::pair<Config::Action, NewNoteState::NewNoteAction>>
-    NewNoteState::m_keyMap{
-        {Config::Action::ESCAPE, NewNoteState::NewNoteAction::CANCEL},
-        {Config::Action::SELECT, NewNoteState::NewNoteAction::CONFIRM},
-    };
+void NewNoteState::render() {
+  m_widget->setInputBuffer(m_inputBuffer);
+  m_widget->draw();
+}
 
 std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
-  const auto &binds = m_config->keyBinds.bindings;
-  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
-    return key == binds.at(pair.first);
-  });
-  auto action = (it != m_keyMap.end()) ? it->second : NewNoteAction::NONE;
-  switch (action) {
-    case NewNoteAction::CONFIRM:
-      handleConfirm();
+  switch (toAction(key)) {
+    case NewNoteAction::CONFIRM: handleConfirm(); return nullptr;
+    case NewNoteAction::CANCEL: m_controller.popState(); return nullptr;
+    case NewNoteAction::BACKSPACE:
+      if (!m_inputBuffer.empty()) m_inputBuffer.pop_back();
       return nullptr;
-    case NewNoteAction::CANCEL:
-      m_controller.popState();
+    case NewNoteAction::APPEND:
+      if (std::isprint(key)) m_inputBuffer += static_cast<char>(key);
       return nullptr;
-    case NewNoteAction::NONE:
-      return nullptr;
+    case NewNoteAction::NONE: return nullptr;
   }
+  return nullptr;
 }
 
 // ---- Private Methods ----
 
+NewNoteState::NewNoteAction NewNoteState::toAction(int key) const {
+  const auto &binds = m_config->keyBinds.bindings;
+  using Predicate = std::function<bool()>;
+  using Action = Config::Action;
+  const std::vector<std::pair<Predicate, NewNoteAction>> dispatch = {
+      {[&] { return key == binds.at(Action::ESCAPE); }, NewNoteAction::CANCEL},
+      {[&] { return key == binds.at(Action::SELECT); }, NewNoteAction::CONFIRM},
+      {[&] { return key == binds.at(Action::BACKSPACE); },
+       NewNoteAction::BACKSPACE},
+      {[&] { return std::isprint(key) != 0; }, NewNoteAction::APPEND},
+  };
+  auto it = std::ranges::find_if(dispatch, [&](const auto &entry) {
+    return entry.first();
+  });
+  return (it != dispatch.end()) ? it->second : NewNoteAction::NONE;
+}
+
 void NewNoteState::handleConfirm() {
   using expected = std::expected<Model::Note, std::string>;
-  auto result = m_repository.create(m_title)
+  if (m_inputBuffer.empty()) {
+    m_controller.popState();
+    return;
+  }
+  auto result = m_repository.create(m_inputBuffer)
                     .and_then([&](Model::Note created) -> expected {
                       m_notes.push_back(created);
                       return created;

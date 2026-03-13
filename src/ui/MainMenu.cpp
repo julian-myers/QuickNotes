@@ -51,7 +51,7 @@ std::tuple<int, int, int> MainMenu::drawOptions() {
   int numOptions = options.size();
   int optionRow = m_startRow + TITLE_HEIGHT + 1;
   int margin = m_winWidth / 4;
-  int range = m_winWidth - (margin * 2);
+  int range = m_winWidth - (margin * 5);
   int spacing = range / (numOptions + 1);
   wattron(m_window, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_ITALIC);
   for (int i = 0; i < numOptions; i++) {

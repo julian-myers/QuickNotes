@@ -1,30 +1,29 @@
 #pragma once
 
 #include "ncurses.h"
-#include "ui/Widget.hpp"
+#include "ui/DialogBox.hpp"
 #include <string>
+#include <string_view>
 namespace QuickNotes::UI {
 
-class DeleteConfirmWidget : public Widget {
+class DeleteConfirmWidget : public DialogBox {
 
   public:
-    explicit DeleteConfirmWidget(WINDOW *window);
-
-    ~DeleteConfirmWidget();
+    explicit DeleteConfirmWidget(WINDOW *parent);
 
     void draw() override;
 
+    void setNoteTitle(std::string_view title);
+
   private:
-    static constexpr const char *LABEL = "Delete Note";
-    static constexpr const char *PROMPT =
+    static constexpr std::string_view LABEL = "Delete Note";
+    static constexpr std::string_view PROMPT =
         "Are you sure you want to delete this note?";
-    static constexpr const char *OPTIONS = "[y] Yes    [n] No";
+    static constexpr std::string_view OPTIONS = "[y] Yes    [n] No";
     static constexpr int DIALOG_HEIGHT = 7;
     static constexpr int DIALOG_WIDTH = 44;
     static constexpr int MARGIN = 2;
-
-    WINDOW *m_dialog;
-    void draw(const std::string &title);
+    std::string m_noteTitle;
 };
 
 } // namespace QuickNotes::UI

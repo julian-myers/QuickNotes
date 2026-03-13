@@ -5,11 +5,16 @@
 #include "config/Config.hpp"
 #include "ncurses.h"
 #include "ui/AddNoteWidget.hpp"
+#include <functional>
 #include <memory>
 
 namespace QuickNotes::App::State {
 
 /// @brief Dialog box for adding new note.
+///
+/// Owns the input buffer and drives all keyboard handling for the
+/// add-note dialog. AddNoteWidget is purely presentational — it renders
+/// whatever buffer this state provides.
 class NewNoteState : public NoteAwareState {
 
   public:
@@ -34,15 +39,17 @@ class NewNoteState : public NoteAwareState {
     std::string name() const override { return "NewNoteState"; }
 
   private:
-    enum class NewNoteAction { CONFIRM, CANCEL, NONE };
-    std::unique_ptr<UI::AddNoteWidget> m_addNoteWidget;
-    void createDialogBox();
-    WINDOW *m_addNoteWindow;
+    enum class NewNoteAction { CONFIRM, CANCEL, APPEND, BACKSPACE, NONE };
+
+    std::unique_ptr<UI::AddNoteWidget> m_widget;
     std::vector<Model::Note> &m_notes;
-    std::string m_title = "";
-    static const std::vector<std::pair<Config::Action, NewNoteAction>> m_keyMap;
+    std::string m_inputBuffer;
+
+    void createDialogBox();
 
     void handleConfirm();
+
+    NewNoteAction toAction(int key) const;
 };
 
 } // namespace QuickNotes::App::State
