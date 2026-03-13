@@ -6,6 +6,7 @@
 #include "config/Config.hpp"
 #include "db/NoteRepository.hpp"
 #include "ui/MainMenu.hpp"
+#include <algorithm>
 #include <memory>
 #include <ncurses.h>
 
@@ -27,23 +28,23 @@ void MainMenuState::onEnter() { wclear(m_window); }
 
 void MainMenuState::onExit() { wclear(m_window); }
 
+using Action = Config::Action;
+const std::vector<std::pair<Action, MainMenuState::MenuAction>>
+    MainMenuState::m_keyMap{
+        {Action::MOVE_UP, MenuAction::MOVE_UP},
+        {Action::MOVE_DOWN, MenuAction::MOVE_DOWN},
+        {Action::MAIN_MENU_NOTES, MenuAction::NOTES_SELECTED},
+        {Action::MAIN_MENU_SETTINGS, MenuAction::SETTINGS_SELECTED},
+        {Action::SELECT, MenuAction::SELECT}
+    };
+
 std::unique_ptr<AbstractState> MainMenuState::handleInput(int key) {
-  using Action = Config::Action;
-
   const auto &binds = m_config->keyBinds.bindings;
-  auto toAction = [&]() -> MenuAction {
-    if (key == binds.at(Action::MOVE_UP)) return MenuAction::MOVE_UP;
-    if (key == binds.at(Action::MOVE_DOWN)) return MenuAction::MOVE_DOWN;
-    if (key == binds.at(Action::MAIN_MENU_NOTES))
-      return MenuAction::NOTES_SELECTED;
-    if (key == binds.at(Action::MAIN_MENU_SETTINGS))
-      return MenuAction::SETTINGS_SELECTED;
-    if (key == binds.at(Action::SELECT)) return MenuAction::SELECT;
-    if (key == binds.at(Action::QUIT)) return MenuAction::QUIT_SELECTED;
-    return MenuAction::NONE;
-  };
-
-  switch (toAction()) {
+  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
+    return key == binds.at(pair.first);
+  });
+  auto action = (it != m_keyMap.end()) ? it->second : MenuAction::NONE;
+  switch (action) {
     case MenuAction::MOVE_UP:
       moveUp();
       return nullptr;

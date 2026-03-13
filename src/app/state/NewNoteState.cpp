@@ -35,7 +35,6 @@ const std::vector<std::pair<Config::Action, NewNoteState::NewNoteAction>>
     };
 
 std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
-  using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
   auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
     return key == binds.at(pair.first);

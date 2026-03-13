@@ -62,6 +62,7 @@ class MainMenuState : public NoteAwareState {
     UI::MainMenu m_menu;
     int m_selectedIndex = 0;
     static constexpr int NUM_OPTIONS = 5;
+    static const std::vector<std::pair<Config::Action, MenuAction>> m_keyMap;
 
     /// @brief Move cursor down.
     void moveDown() override;
