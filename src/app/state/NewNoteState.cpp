@@ -14,7 +14,7 @@ using namespace DB;
 
 NewNoteState::NewNoteState(
     WINDOW *window,
-    std::shared_ptr<Config::Config> config,
+    std::shared_ptr<const Config::Config> config,
     IAppController &controller,
     NotesRepository &repository,
     std::vector<Model::Note> &notes
@@ -28,15 +28,20 @@ void NewNoteState::onExit() { m_addNoteWidget.reset(); }
 
 void NewNoteState::render() {}
 
+const std::vector<std::pair<Config::Action, NewNoteState::NewNoteAction>>
+    NewNoteState::m_keyMap{
+        {Config::Action::ESCAPE, NewNoteState::NewNoteAction::CANCEL},
+        {Config::Action::SELECT, NewNoteState::NewNoteAction::CONFIRM},
+    };
+
 std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
-  auto toAction = [&]() -> NewNoteAction {
-    if (key == binds.at(Action::ESCAPE)) return NewNoteAction::CANCEL;
-    if (key == binds.at(Action::SELECT)) return NewNoteAction::CONFIRM;
-    return NewNoteAction::NONE;
-  };
-  switch (toAction()) {
+  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
+    return key == binds.at(pair.first);
+  });
+  auto action = (it != m_keyMap.end()) ? it->second : NewNoteAction::NONE;
+  switch (action) {
     case NewNoteAction::CONFIRM:
       handleConfirm();
       return nullptr;

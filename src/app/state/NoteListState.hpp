@@ -14,7 +14,7 @@
 namespace QuickNotes::App::State {
 
 class NoteListState : public NoteAwareState {
-    using ConfigPtr = std::shared_ptr<Config::Config>;
+    using ConfigPtr = std::shared_ptr<const Config::Config>;
 
   public:
     /// @brief Constructs a NoteListState

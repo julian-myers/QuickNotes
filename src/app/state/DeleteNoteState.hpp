@@ -11,7 +11,7 @@
 namespace QuickNotes::App::State {
 
 class DeleteNoteState : public NoteAwareState {
-    using ConfigPtr = std::shared_ptr<Config::Config>;
+    using ConfigPtr = std::shared_ptr<const Config::Config>;
 
   public:
     DeleteNoteState(

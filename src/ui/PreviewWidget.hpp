@@ -13,7 +13,7 @@ class PreviewWidget : public Widget {
     /// @brief Constructs a PreviewWidget.
     /// @param window reference to an ncurses window.
     explicit PreviewWidget(
-        WINDOW *window, std::shared_ptr<Config::Config> config
+        WINDOW *window, std::shared_ptr<const Config::Config> config
     );
 
     /// @brief draw the window and content.
@@ -29,7 +29,7 @@ class PreviewWidget : public Widget {
     // int windowHeight();
 
   private:
-    std::shared_ptr<Config::Config> m_config;
+    std::shared_ptr<const Config::Config> m_config;
     // int m_windowWidth, m_windowHeight, m_startRow, m_startColumn;
 };
 

@@ -14,7 +14,7 @@ class NoteAwareState : public AbstractState {
   public:
     NoteAwareState(
         WINDOW *window,
-        std::shared_ptr<Config::Config> config,
+        std::shared_ptr<const Config::Config> config,
         IAppController &controller,
         DB::NotesRepository &repository
     )

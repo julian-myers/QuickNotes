@@ -10,7 +10,7 @@
 
 namespace QuickNotes::UI {
 
-using ConfigPtr = std::shared_ptr<Config::Config>;
+using ConfigPtr = std::shared_ptr<const Config::Config>;
 
 NoteViewWidget::NoteViewWidget(
     WINDOW *window, ConfigPtr config, Model::Note &note

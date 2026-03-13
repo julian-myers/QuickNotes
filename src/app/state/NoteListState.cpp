@@ -15,7 +15,7 @@
 #include <stdexcept>
 
 namespace QuickNotes::App::State {
-using ConfigPtr = std::shared_ptr<Config::Config>;
+using ConfigPtr = std::shared_ptr<const Config::Config>;
 
 NoteListState::NoteListState(
     WINDOW *window,

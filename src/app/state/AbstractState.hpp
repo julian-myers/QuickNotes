@@ -57,7 +57,7 @@ class AbstractState {
   protected:
     explicit AbstractState(
         WINDOW *window,
-        std::shared_ptr<Config::Config> config,
+        std::shared_ptr<const Config::Config> config,
         IAppController &controller
     )
         : m_window(window), m_config(config), m_controller(controller),
@@ -70,7 +70,7 @@ class AbstractState {
     }
 
     WINDOW *m_window;
-    std::shared_ptr<Config::Config> m_config;
+    std::shared_ptr<const Config::Config> m_config;
     IAppController &m_controller;
     int m_cursorPosition;
 };

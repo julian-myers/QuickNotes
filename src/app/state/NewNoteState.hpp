@@ -22,7 +22,7 @@ class NewNoteState : public NoteAwareState {
     /// @param notes Reference to instance of Model::Note.
     explicit NewNoteState(
         WINDOW *window,
-        std::shared_ptr<Config::Config> config,
+        std::shared_ptr<const Config::Config> config,
         IAppController &controller,
         DB::NotesRepository &repository,
         std::vector<Model::Note> &notes
@@ -40,6 +40,7 @@ class NewNoteState : public NoteAwareState {
     WINDOW *m_addNoteWindow;
     std::vector<Model::Note> &m_notes;
     std::string m_title = "";
+    static const std::vector<std::pair<Config::Action, NewNoteAction>> m_keyMap;
 
     void handleConfirm();
 };

@@ -10,7 +10,7 @@
 namespace QuickNotes::UI {
 
 PreviewWidget::PreviewWidget(
-    WINDOW *window, std::shared_ptr<Config::Config> config
+    WINDOW *window, std::shared_ptr<const Config::Config> config
 )
     : Widget(window), m_config(config) {}
 

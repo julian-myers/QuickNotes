@@ -12,7 +12,7 @@
 
 namespace QuickNotes::App::State {
 class ViewingState : public NoteAwareState {
-    using ConfigPtr = std::shared_ptr<Config::Config>;
+    using ConfigPtr = std::shared_ptr<const Config::Config>;
 
   public:
     explicit ViewingState(
@@ -48,5 +48,6 @@ class ViewingState : public NoteAwareState {
     WINDOW *m_pad = nullptr;
     int m_scrollOffset;
     static constexpr int PAD_HEIGHT = 5000;
+    static const std::vector<std::pair<Config::Action, ViewActions>> m_keyMap;
 };
 } // namespace QuickNotes::App::State

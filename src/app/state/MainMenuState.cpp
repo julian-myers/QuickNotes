@@ -15,7 +15,7 @@ namespace QuickNotes::App::State {
 
 MainMenuState::MainMenuState(
     WINDOW *window,
-    std::shared_ptr<Config::Config> config,
+    std::shared_ptr<const Config::Config> config,
     IAppController &controller,
     DB::NotesRepository &repository
 ) noexcept

@@ -9,7 +9,7 @@
 
 namespace QuickNotes::App::State {
 
-using ConfigPtr = std::shared_ptr<Config::Config>;
+using ConfigPtr = std::shared_ptr<const Config::Config>;
 
 ViewingState::ViewingState(
     WINDOW *window,
@@ -51,18 +51,22 @@ void ViewingState::moveDown() {
   m_scrollOffset = std::min(PAD_HEIGHT - getmaxy(m_window), m_scrollOffset + 1);
 }
 
+const std::vector<std::pair<Config::Action, ViewingState::ViewActions>>
+    ViewingState::m_keyMap = {
+        {Config::Action::MOVE_UP, ViewActions::SCROLL_UP},
+        {Config::Action::MOVE_DOWN, ViewActions::SCROLL_DOWN},
+        {Config::Action::VIEW_EDIT, ViewActions::EDIT},
+        {Config::Action::ESCAPE, ViewActions::BACK},
+};
+
 std::unique_ptr<AbstractState> ViewingState::handleInput(int key) {
   using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
-  auto toAction = [&]() -> ViewActions {
-    if (key == binds.at(Action::MOVE_UP)) return ViewActions::SCROLL_UP;
-    if (key == binds.at(Action::MOVE_DOWN)) return ViewActions::SCROLL_DOWN;
-    if (key == binds.at(Action::VIEW_EDIT)) return ViewActions::EDIT;
-    if (key == binds.at(Action::ESCAPE)) return ViewActions::BACK;
-    return ViewActions::NONE;
-  };
-
-  switch (toAction()) {
+  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
+    return key == binds.at(pair.first);
+  });
+  auto action = (it != m_keyMap.end()) ? it->second : ViewActions::NONE;
+  switch (action) {
     case ViewActions::SCROLL_UP:
       moveUp();
       return nullptr;

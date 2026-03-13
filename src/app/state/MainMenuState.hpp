@@ -27,7 +27,7 @@ class MainMenuState : public NoteAwareState {
     /// @param config shared pointer to the application configuration.
     explicit MainMenuState(
         WINDOW *window,
-        std::shared_ptr<Config::Config> config,
+        std::shared_ptr<const Config::Config> config,
         IAppController &controller,
         DB::NotesRepository &repository
     ) noexcept;
