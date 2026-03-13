@@ -4,7 +4,6 @@
 #include "app/state/AbstractState.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
 #include "ui/MainMenu.hpp"
 #include <algorithm>
 #include <memory>
@@ -18,7 +17,7 @@ MainMenuState::MainMenuState(
     WINDOW *window,
     std::shared_ptr<const Config::Config> config,
     IAppController &controller,
-    DB::NotesRepository &repository
+    DB::INotesRepository &repository
 ) noexcept
     : NoteAwareState(window, config, controller, repository), m_menu(window) {}
 

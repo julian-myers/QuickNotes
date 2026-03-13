@@ -2,7 +2,6 @@
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ui/DeleteConfirmWidget.hpp"
 #include <algorithm>
@@ -15,7 +14,7 @@ DeleteNoteState::DeleteNoteState(
     WINDOW *window,
     ConfigPtr config,
     IAppController &controller,
-    DB::NotesRepository &repository,
+    DB::INotesRepository &repository,
     std::vector<Model::Note> &notes,
     int selectedIndex
 )

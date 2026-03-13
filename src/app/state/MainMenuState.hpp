@@ -4,7 +4,6 @@
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
 #include "ui/MainMenu.hpp"
 #include <memory>
 #include <ncurses.h>
@@ -29,7 +28,7 @@ class MainMenuState : public NoteAwareState {
         WINDOW *window,
         std::shared_ptr<const Config::Config> config,
         IAppController &controller,
-        DB::NotesRepository &repository
+        DB::INotesRepository &repository
     ) noexcept;
 
     /// @brief Maps key/user input to semantic action to which informs widget

@@ -3,7 +3,7 @@
 #include "app/Controller.hpp"
 #include "app/state/AbstractState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
+#include "db/INoteRepository.hpp"
 #include "ncurses.h"
 #include <concepts>
 #include <memory>
@@ -16,7 +16,7 @@ class NoteAwareState : public AbstractState {
         WINDOW *window,
         std::shared_ptr<const Config::Config> config,
         IAppController &controller,
-        DB::NotesRepository &repository
+        DB::INotesRepository &repository
     )
         : AbstractState(window, config, controller), m_repository(repository) {}
 
@@ -30,9 +30,10 @@ class NoteAwareState : public AbstractState {
     }
 
     void setError(const std::string &message) { m_errorMessage = message; }
+
     void clearError() { m_errorMessage.clear(); }
 
-    DB::NotesRepository &m_repository;
+    DB::INotesRepository &m_repository;
     std::string m_errorMessage;
 };
 

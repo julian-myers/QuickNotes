@@ -7,7 +7,6 @@
 #include "app/state/ViewingState.hpp"
 #include "config/Config.hpp"
 #include "config/Editor.hpp"
-#include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ncurses.h"
 #include "ui/PreviewWidget.hpp"
@@ -22,7 +21,7 @@ NoteListState::NoteListState(
     WINDOW *window,
     ConfigPtr config,
     IAppController &controller,
-    DB::NotesRepository &repository
+    DB::INotesRepository &repository
 ) noexcept
     : NoteAwareState(window, config, controller, repository),
       m_selectedIndex(0), m_listWindow(nullptr), m_previewWindow(nullptr) {}

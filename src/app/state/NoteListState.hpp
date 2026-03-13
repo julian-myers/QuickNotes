@@ -4,7 +4,6 @@
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ui/NoteListWidget.hpp"
 #include "ui/PreviewWidget.hpp"
@@ -24,7 +23,7 @@ class NoteListState : public NoteAwareState {
         WINDOW *window,
         ConfigPtr config,
         IAppController &controller,
-        DB::NotesRepository &repository
+        DB::INotesRepository &repository
     ) noexcept;
 
     /// @brief Handle user input

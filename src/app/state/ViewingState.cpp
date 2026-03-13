@@ -15,7 +15,7 @@ ViewingState::ViewingState(
     WINDOW *window,
     ConfigPtr config,
     IAppController &controller,
-    DB::NotesRepository &repository,
+    DB::INotesRepository &repository,
     Model::Note note
 ) noexcept
     : NoteAwareState(window, config, controller, repository), m_note(note) {}

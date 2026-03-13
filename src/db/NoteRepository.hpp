@@ -1,8 +1,8 @@
 #pragma once
 
 #include "db/Database.hpp"
+#include "db/INoteRepository.hpp"
 #include "models/Notes.hpp"
-#include <expected>
 #include <sqlite3.h>
 #include <string>
 #include <vector>
@@ -26,7 +26,7 @@ namespace QuickNotes::DB {
 ///
 /// @see Database
 /// @see Model::Note.
-class NotesRepository {
+class NotesRepository : public INotesRepository {
 
   public:
     /// @brief Constructs a NotesRepository.
@@ -44,7 +44,7 @@ class NotesRepository {
     /// @return The created note upon successful addition to the database.
     /// @return An error string on failure. For example, if the title already
     /// exists or the database connection failed.
-    std::expected<Model::Note, std::string> create(const std::string &title);
+    INotesRepository::NoteResult create(const std::string &title) override;
 
     /// @brief Removes a note from the database.
     ///
@@ -52,7 +52,7 @@ class NotesRepository {
     /// @return The deleted note on success.
     /// @return An error string on failure. For example: if no note with the id
     ///  exits.
-    std::expected<Model::Note, std::string> remove(const Model::Note note);
+    INotesRepository::NoteResult remove(const Model::Note note) override;
 
     /// @brief Find a note by its id.
     ///
@@ -60,20 +60,20 @@ class NotesRepository {
     /// @return The note which has the passed ID.
     /// @return An error string on failure if, for example, the database
     /// connection failed orif a note with the passed id doesn't exist.
-    std::expected<Model::Note, std::string> findById(int id);
+    INotesRepository::NoteResult findById(int id) override;
 
     /// @brief Query the database for all notes.
     ///
     /// @return a vector containing all the notes in the database. Empty if
     /// notes notes exist yet.
-    std::vector<Model::Note> findAll();
+    std::vector<Model::Note> findAll() override;
 
     /// @brief Find the most recently edited notes in the db.
     ///
     /// @param amount Number of most recent to pull.
     /// @return A vector of size amount containing the most recently edited
     /// notes ordered by updated_at descending.
-    std::vector<Model::Note> findMostRecent(int amount);
+    std::vector<Model::Note> findMostRecent(int amount) override;
 
     /// @brief Edit / update a note.
     ///
@@ -82,7 +82,7 @@ class NotesRepository {
     /// @param note A reference to the note to be updated.
     /// @return The updated note on success.
     /// @return An error string on failure.
-    std::expected<Model::Note, std::string> update(const Model::Note &note);
+    INotesRepository::NoteResult update(const Model::Note &note) override;
 
   private:
     /// @brief RAII wrapper for sqlite3_stmt.

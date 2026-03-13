@@ -3,7 +3,6 @@
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
-#include "db/NoteRepository.hpp"
 #include "ncurses.h"
 #include "ui/AddNoteWidget.hpp"
 #include <memory>
@@ -24,7 +23,7 @@ class NewNoteState : public NoteAwareState {
         WINDOW *window,
         std::shared_ptr<const Config::Config> config,
         IAppController &controller,
-        DB::NotesRepository &repository,
+        DB::INotesRepository &repository,
         std::vector<Model::Note> &notes
     ) noexcept;
 
