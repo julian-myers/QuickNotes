@@ -11,6 +11,7 @@
 #include "models/Notes.hpp"
 #include "ncurses.h"
 #include "ui/PreviewWidget.hpp"
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 
@@ -45,22 +46,24 @@ void NoteListState::onExit() {
   wclear(m_window);
 }
 
-std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
-  using Action = Config::Action;
-  const auto &binds = m_config->keyBinds.bindings;
-  auto toAction = [&]() -> ListActions {
-    if (key == binds.at(Action::MOVE_UP)) return ListActions::MOVE_UP;
-    if (key == binds.at(Action::MOVE_DOWN)) return ListActions::MOVE_DOWN;
-    if (key == binds.at(Action::MOVE_RIGHT)) return ListActions::VIEW_NOTE;
-    if (key == binds.at(Action::SELECT)) return ListActions::SELECT;
-    if (key == binds.at(Action::SEARCH)) return ListActions::SEARCH;
-    if (key == binds.at(Action::NEW_NOTE)) return ListActions::NEW_NOTE;
-    if (key == binds.at(Action::DELETE_NOTE)) return ListActions::DELETE_NOTE;
-    if (key == binds.at(Action::QUIT)) return ListActions::QUIT;
-    return ListActions::NONE;
-  };
+const std::vector<NoteListState::Binding> NoteListState::m_keyMap{
+    {Config::Action::MOVE_UP, ListActions::MOVE_UP},
+    {Config::Action::MOVE_DOWN, ListActions::MOVE_DOWN},
+    {Config::Action::MOVE_RIGHT, ListActions::VIEW_NOTE},
+    {Config::Action::SELECT, ListActions::SELECT},
+    {Config::Action::SEARCH, ListActions::SEARCH},
+    {Config::Action::NEW_NOTE, ListActions::NEW_NOTE},
+    {Config::Action::DELETE_NOTE, ListActions::DELETE_NOTE},
+    {Config::Action::QUIT, ListActions::QUIT},
+};
 
-  switch (toAction()) {
+std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
+  const auto &binds = m_config->keyBinds.bindings;
+  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
+    return key == binds.at(pair.first);
+  });
+  auto action = (it != m_keyMap.end()) ? it->second : ListActions::NONE;
+  switch (action) {
     case ListActions::MOVE_UP:
       moveUp();
       return nullptr;
@@ -156,11 +159,5 @@ void NoteListState::loadNotes() {
     m_notes = {};
   }
 }
-
-Model::Note NoteListState::currentNote() const { return SAMPLE_NOTE; }
-
-std::unique_ptr<AbstractState> NoteListState::select() { return nullptr; }
-
-std::unique_ptr<AbstractState> NoteListState::search() { return nullptr; }
 
 } // namespace QuickNotes::App::State

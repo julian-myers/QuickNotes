@@ -1,9 +1,11 @@
 #include "DeleteNoteState.hpp"
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
+#include "config/Config.hpp"
 #include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ui/DeleteConfirmWidget.hpp"
+#include <algorithm>
 #include <vector>
 
 namespace QuickNotes::App::State {
@@ -26,15 +28,18 @@ void DeleteNoteState::onEnter() {
 void DeleteNoteState::onExit() {}
 void DeleteNoteState::render() { m_widget->draw(); }
 
+const std::vector<DeleteNoteState::Binding> DeleteNoteState::m_keyMap{
+    {Config::Action::NO, DeleteConfirmAction::CANCEL},
+    {Config::Action::YES, DeleteConfirmAction::CONFIRM},
+};
+
 std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
-  using Action = Config::Action;
   const auto &binds = m_config->keyBinds.bindings;
-  auto toAction = [&]() -> DeleteConfirmAction {
-    if (key == binds.at(Action::NO)) return DeleteConfirmAction::CANCEL;
-    if (key == binds.at(Action::YES)) return DeleteConfirmAction::CONFIRM;
-    return DeleteConfirmAction::NONE;
-  };
-  switch (toAction()) {
+  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
+    return key == binds.at(pair.first);
+  });
+  auto action = (it != m_keyMap.end()) ? it->second : DeleteConfirmAction::NONE;
+  switch (action) {
     case DeleteConfirmAction::CONFIRM:
       handleConfirm();
       m_controller.popState();

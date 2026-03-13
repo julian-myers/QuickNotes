@@ -2,6 +2,7 @@
 
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
+#include "config/Config.hpp"
 #include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ui/DeleteConfirmWidget.hpp"
@@ -36,6 +37,8 @@ class DeleteNoteState : public NoteAwareState {
     std::vector<Model::Note> &m_notes;
     Model::Note m_note;
     int m_selectedIndex;
+    using Binding = std::pair<Config::Action, DeleteConfirmAction>;
+    static const std::vector<Binding> m_keyMap;
 
     void handleConfirm();
 };
