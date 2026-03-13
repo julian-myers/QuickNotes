@@ -32,7 +32,18 @@ class App : public IAppController {
     /// @brief quit the app.
     void quit() override { m_running = false; }
 
+    /// @brief Push a state onto the stack.
+    ///
+    /// Calls the onEnter() method of the state that is being pushed onto the
+    /// stack.
+    ///
+    /// @param state The next state that is being transitioned to.
     void pushState(std::unique_ptr<AbstractState> state) override;
+
+    /// @brief Pop the top state from the stack.
+    ///
+    /// Calls the top state's onExit() then pops it from the stack. If the stack
+    /// is not empty then it will call the new top's render() method.
     void popState() override;
 
   private:
@@ -41,5 +52,12 @@ class App : public IAppController {
     DB::NotesRepository m_repository;
     std::stack<std::unique_ptr<AbstractState>> m_stateStack;
     bool m_running = true;
+
+    /// @brief Initializes the logger.
+    void setupLogger();
+
+    /// @brief Sets ncurses parameters such as keypad, colors, default
+    /// background, etc.
+    void setupCurses();
 };
 } // namespace QuickNotes::App

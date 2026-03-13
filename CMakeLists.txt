@@ -87,6 +87,7 @@ target_link_libraries(notes_lib PRIVATE
 	${NCURSESW_LIBRARY}
 	tomlplusplus::tomlplusplus
 	sqlite3
+	spdlog::spdlog
 )
 
 # ------------ Main Executable -----------------------------------------------------

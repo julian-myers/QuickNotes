@@ -1,4 +1,5 @@
 #include "db/Database.hpp"
+#include "utils/Log.hpp"
 #include <cstdlib>
 #include <filesystem>
 #include <sqlite3.h>
@@ -9,9 +10,12 @@ namespace QuickNotes::DB {
 Database::Database() : m_db(nullptr) {
   auto path = dbPath();
   std::filesystem::create_directories(path.parent_path());
+  QN_LOG_INFO("Opening database at {}", path.string());
   if (sqlite3_open(path.c_str(), &m_db) != SQLITE_OK) {
+    QN_LOG_ERROR("Failed to open database: {}", sqlite3_errmsg(m_db));
     throw std::runtime_error(sqlite3_errmsg(m_db));
   }
+  QN_LOG_DEBUG("Database opened successfully");
   execute(NOTES_SCHEMA);
 }
 
@@ -22,8 +26,8 @@ sqlite3 *Database::connection() { return m_db; }
 std::filesystem::path Database::dbPath() {
   const char *xdg = std::getenv("XDG_DATA_HOME");
   std::filesystem::path dataDir =
-      xdg ? std::filesystem::path(xdg)
-          : std::filesystem::path(std::getenv("HOME")) / ".local/share";
+      xdg ? std::filesystem::path(xdg) :
+            std::filesystem::path(std::getenv("HOME")) / ".local/share";
   return dataDir / "QuickNotes" / "notes.db";
 }
 
@@ -33,6 +37,7 @@ void Database::execute(const std::string &sql) {
   if (rc != SQLITE_OK) {
     std::string error = errMsg;
     sqlite3_free(errMsg);
+    QN_LOG_ERROR("Database::execute failed: {}", error);
     throw std::runtime_error("Database::execute failed: " + error);
   }
 }

@@ -35,6 +35,8 @@ class ViewingState : public NoteAwareState {
 
     void moveDown() override;
 
+    std::string name() const override { return "ViewingState"; }
+
   private:
     enum class ViewActions {
       SCROLL_UP,

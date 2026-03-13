@@ -41,6 +41,8 @@ class NoteListState : public NoteAwareState {
     /// @brief teardown subwindows.
     void onExit() override;
 
+    std::string name() const override { return "NoteListState"; }
+
   private:
     enum class ListActions {
       MOVE_UP,

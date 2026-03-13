@@ -54,6 +54,9 @@ class AbstractState {
       m_cursorPosition = std::min(getmaxy(m_window), m_cursorPosition + 1);
     }
 
+    /// @brief Name of state for purpose of logging/debugging.
+    virtual std::string name() const = 0;
+
   protected:
     explicit AbstractState(
         WINDOW *window,
@@ -63,16 +66,16 @@ class AbstractState {
         : m_window(window), m_config(config), m_controller(controller),
           m_cursorPosition(0) {};
 
+    WINDOW *m_window;
+    std::shared_ptr<const Config::Config> m_config;
+    IAppController &m_controller;
+    int m_cursorPosition;
+
     template <typename T>
       requires std::derived_from<T, AbstractState>
     std::unique_ptr<T> makeState() {
       return std::make_unique<T>(m_window, m_config, m_controller);
     }
-
-    WINDOW *m_window;
-    std::shared_ptr<const Config::Config> m_config;
-    IAppController &m_controller;
-    int m_cursorPosition;
 };
 
 } // namespace QuickNotes::App::State

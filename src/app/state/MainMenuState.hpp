@@ -42,7 +42,10 @@ class MainMenuState : public NoteAwareState {
     void render() override;
 
     void onEnter() override;
+
     void onExit() override;
+
+    std::string name() const override { return "MainMenuState"; }
 
   private:
     ///@brief Set of possible menu actions.

@@ -28,6 +28,8 @@ class DeleteNoteState : public NoteAwareState {
     void onEnter() override;
     void onExit() override;
 
+    std::string name() const override { return "DeleteNoteState"; }
+
   private:
     enum class DeleteConfirmAction { CONFIRM, CANCEL, NONE };
     std::unique_ptr<UI::DeleteConfirmWidget> m_widget;

@@ -32,6 +32,7 @@ class NewNoteState : public NoteAwareState {
     void onExit() override;
     void render() override;
     std::unique_ptr<AbstractState> handleInput(int key) override;
+    std::string name() const override { return "NewNoteState"; }
 
   private:
     enum class NewNoteAction { CONFIRM, CANCEL, NONE };
