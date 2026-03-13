@@ -4,9 +4,6 @@ compile_commands.json
 docs/html
 docs/latex
 
-flake.nix
-flake.lock
-
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
