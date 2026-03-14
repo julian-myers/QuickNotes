@@ -1,4 +1,5 @@
 #include "NoteCard.hpp"
+#include "markdown/Colors.hpp"
 #include "models/Notes.hpp"
 #include "ui/Subwindow.hpp"
 #include "ui/Widget.hpp"
@@ -13,13 +14,14 @@ void NoteCard::draw(bool selected) {
   int w = getmaxx(win) - 2;
 
   wclear(win);
-  m_subWin.drawBorder();
-  if (selected) wattron(win, A_REVERSE);
 
-  wattron(win, A_BOLD);
+  if (selected) {
+    wattron(win, COLOR_PAIR(Markdown::Colors::PAIR_CARD_SELECTED));
+  }
+
+  wattron(win, A_BOLD | A_ITALIC);
   mvwprintw(win, 1, 1, "%-*.*s", w - 1, w - 1, m_note.title.c_str());
-  wattroff(win, A_BOLD);
-  if (selected) wattroff(win, A_REVERSE);
+  wattroff(win, A_BOLD | A_ITALIC);
 
   mvwprintw(
       win, 2, 1, "Created: %-*s", w - 10, shortDate(m_note.createdAt).c_str()
@@ -28,6 +30,12 @@ void NoteCard::draw(bool selected) {
   mvwprintw(
       win, 3, 1, "Edited:  %-*s", w - 10, shortDate(m_note.updatedAt).c_str()
   );
+
+  mvwprintw(win, 4, 1, "%-*s", w - 10, "");
+
+  if (selected) {
+    wattroff(win, COLOR_PAIR(Markdown::Colors::PAIR_CARD_SELECTED));
+  }
 
   wnoutrefresh(win);
 }

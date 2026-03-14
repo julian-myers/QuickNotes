@@ -42,6 +42,19 @@ struct ColorConfig {
     // base
     std::string textBackground = "#1E1E2E";
     std::string textForeground = "#CDD6F4";
+
+    // misc
+    std::string subtext1 = "#bac2de";
+    std::string subtext0 = "#a6adc8";
+    std::string overlay2 = "#9399b2";
+    std::string overlay1 = "#7f849c";
+    std::string overlay0 = "#6c7086";
+    std::string surface2 = "#585b70";
+    std::string surface1 = "#45475a";
+    std::string surface0 = "#313244";
+    std::string base = "#1e1e2e";
+    std::string mantle = "#181825";
+    std::string crust = "#11111b";
 };
 
 enum class Action {

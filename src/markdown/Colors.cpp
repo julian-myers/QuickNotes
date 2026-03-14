@@ -52,6 +52,10 @@ void initColorPairs(const Config::Config &config) {
   defineColor(COLOR_TABLE_BODY_FG, config.colors.tableBodyfg);
   defineColor(COLOR_TEXT_FG, config.colors.textForeground);
   defineColor(COLOR_TEXT_BG, config.colors.textBackground);
+  defineColor(COLOR_CARD_FG, config.colors.subtext1);
+  defineColor(COLOR_CARD_BG, config.colors.surface2);
+  defineColor(COLOR_CARD_SELECTED_FG, config.colors.textBackground);
+  defineColor(COLOR_CARD_SELECTED_BG, config.colors.boldItalicfg);
 
   init_pair(PAIR_HEADING_1, COLOR_HEADING_1, COLOR_HEADING_BG);
   init_pair(PAIR_HEADING_2, COLOR_HEADING_1, COLOR_HEADING_BG);
@@ -76,5 +80,7 @@ void initColorPairs(const Config::Config &config) {
   init_pair(PAIR_TABLE_HEADER, COLOR_TABLE_HEADER_FG, COLOR_TEXT_BG);
   init_pair(PAIR_TABLE_BODY, COLOR_TABLE_BODY_FG, COLOR_TEXT_BG);
   init_pair(PAIR_TEXT, COLOR_TEXT_FG, COLOR_TEXT_BG);
+  init_pair(PAIR_CARD, COLOR_CARD_FG, COLOR_CARD_BG);
+  init_pair(PAIR_CARD_SELECTED, COLOR_CARD_SELECTED_FG, COLOR_CARD_SELECTED_BG);
 }
 } // namespace QuickNotes::Markdown::Colors

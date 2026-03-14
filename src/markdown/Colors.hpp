@@ -44,6 +44,13 @@ constexpr int COLOR_TABLE_BODY_FG = 36;
 constexpr int COLOR_TEXT_FG = 37;
 constexpr int COLOR_TEXT_BG = 38;
 
+// misc
+constexpr int COLOR_CARD_FG = 39;
+constexpr int COLOR_CARD_BG = 40;
+
+constexpr int COLOR_CARD_SELECTED_FG = 41;
+constexpr int COLOR_CARD_SELECTED_BG = 42;
+
 // ---- Pairs ----
 // headings
 constexpr int PAIR_HEADING_1 = 1;
@@ -77,6 +84,9 @@ constexpr int PAIR_TABLE_BODY = 18;
 
 // base
 constexpr int PAIR_TEXT = 19;
+
+constexpr int PAIR_CARD = 20;
+constexpr int PAIR_CARD_SELECTED = 20;
 
 /// @brief Struct to wrap RGB in a type.
 struct NCursesRGB {
