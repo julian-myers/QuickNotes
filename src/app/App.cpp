@@ -35,6 +35,7 @@ App::~App() noexcept { endwin(); }
 void App::run() {
   while (m_running) {
     m_stateStack.top()->render();
+    doupdate();
     int input = getch();
     if (auto next = m_stateStack.top()->handleInput(input)) {
       pushState(std::move(next));

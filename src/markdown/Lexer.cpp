@@ -59,15 +59,9 @@ using TokenListRef = std::vector<Token> &;
 
 void Lexer::handleState(TokenListRef tokens) {
   switch (m_state) {
-    case LexerState::DEFAULT:
-      handleDefaultState(tokens);
-      break;
-    case LexerState::IN_CODE_BLOCK:
-      handleCodeBlockState(tokens);
-      break;
-    case LexerState::IN_TABLE:
-      handleTableState(tokens);
-      break;
+    case LexerState::DEFAULT: handleDefaultState(tokens); break;
+    case LexerState::IN_CODE_BLOCK: handleCodeBlockState(tokens); break;
+    case LexerState::IN_TABLE: handleTableState(tokens); break;
     default:
       // I am pretty sure this actually impossible to reach.
       throw std::runtime_error("Unknown lexer state");
@@ -77,27 +71,13 @@ void Lexer::handleState(TokenListRef tokens) {
 void Lexer::handleDefaultState(TokenListRef tokens) {
   char c = peek();
   switch (c) {
-    case NEW_LINE_CHAR:
-      readNewLine(tokens);
-      break;
-    case POUND_SIGN:
-      readHeading(tokens);
-      break;
-    case GREATER_THAN:
-      readBlockQuote(tokens);
-      break;
-    case BACK_TICK:
-      readBackTick(tokens);
-      break;
-    case ASTERIX:
-      readEmphasis(tokens);
-      break;
-    case PIPE:
-      readPipe(tokens);
-      break;
-    case DASH:
-      readDash(tokens);
-      break;
+    case NEW_LINE_CHAR: readNewLine(tokens); break;
+    case POUND_SIGN: readHeading(tokens); break;
+    case GREATER_THAN: readBlockQuote(tokens); break;
+    case BACK_TICK: readBackTick(tokens); break;
+    case ASTERIX: readEmphasis(tokens); break;
+    case PIPE: readPipe(tokens); break;
+    case DASH: readDash(tokens); break;
     default:
       if (std::isdigit((unsigned char)c)) {
         readOrderedList(tokens);
@@ -182,8 +162,8 @@ void Lexer::handleTableState(TokenListRef tokens) {
             advance();
           }
           if (peek() == NEW_LINE_CHAR || isAtEnd()) return;
-          (peek() == DASH || peek() == COLON) ? readTableDelimiter(tokens)
-                                              : readTableCell(tokens);
+          (peek() == DASH || peek() == COLON) ? readTableDelimiter(tokens) :
+                                                readTableCell(tokens);
         }},
        {[](char) { return true; }, [&]() { readTableCell(tokens); }}}
   };
@@ -224,24 +204,12 @@ void Lexer::readHeading(TokenListRef tokens) {
   }
 
   switch (level) {
-    case 1:
-      tokens.push_back(makeToken(TokenType::HEADING_1));
-      break;
-    case 2:
-      tokens.push_back(makeToken(TokenType::HEADING_2));
-      break;
-    case 3:
-      tokens.push_back(makeToken(TokenType::HEADING_3));
-      break;
-    case 4:
-      tokens.push_back(makeToken(TokenType::HEADING_4));
-      break;
-    case 5:
-      tokens.push_back(makeToken(TokenType::HEADING_5));
-      break;
-    case 6:
-      tokens.push_back(makeToken(TokenType::HEADING_6));
-      break;
+    case 1: tokens.push_back(makeToken(TokenType::HEADING_1)); break;
+    case 2: tokens.push_back(makeToken(TokenType::HEADING_2)); break;
+    case 3: tokens.push_back(makeToken(TokenType::HEADING_3)); break;
+    case 4: tokens.push_back(makeToken(TokenType::HEADING_4)); break;
+    case 5: tokens.push_back(makeToken(TokenType::HEADING_5)); break;
+    case 6: tokens.push_back(makeToken(TokenType::HEADING_6)); break;
   }
 }
 
@@ -272,15 +240,9 @@ void Lexer::readEmphasis(TokenListRef tokens) {
   }
 
   switch (count) {
-    case 1:
-      tokens.push_back(makeToken(TokenType::ITALIC));
-      break;
-    case 2:
-      tokens.push_back(makeToken(TokenType::BOLD));
-      break;
-    case 3:
-      tokens.push_back(makeToken(TokenType::BOLD_ITALIC));
-      break;
+    case 1: tokens.push_back(makeToken(TokenType::ITALIC)); break;
+    case 2: tokens.push_back(makeToken(TokenType::BOLD)); break;
+    case 3: tokens.push_back(makeToken(TokenType::BOLD_ITALIC)); break;
   }
 }
 

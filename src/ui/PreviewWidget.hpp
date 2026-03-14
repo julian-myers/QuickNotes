@@ -3,6 +3,7 @@
 #include "Widget.hpp"
 #include "config/Config.hpp"
 #include "models/Notes.hpp"
+#include "ui/Subwindow.hpp"
 #include <memory>
 
 namespace QuickNotes::UI {
@@ -21,15 +22,11 @@ class PreviewWidget : public Widget {
 
     /// @brief draw the window and content.
     /// @param note The note to preview.
-    void draw(Model::Note &note);
-
-    /// @brief Getter for the window with.
-    /// @return Width of window
-    // int windowWidth();
-    // int windowHeight();
+    void draw(const Model::Note &note);
 
   private:
     std::shared_ptr<const Config::Config> m_config;
+    SubWindow m_innerWindow;
     // int m_windowWidth, m_windowHeight, m_startRow, m_startColumn;
 };
 

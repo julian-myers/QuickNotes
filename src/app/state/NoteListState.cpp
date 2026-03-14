@@ -9,9 +9,7 @@
 #include "config/Editor.hpp"
 #include "models/Notes.hpp"
 #include "ncurses.h"
-#include "ui/PreviewWidget.hpp"
-#include "ui/StatusBar.hpp"
-#include "ui/Subwindow.hpp"
+#include "ui/NoteContainer.hpp"
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
@@ -27,44 +25,28 @@ NoteListState::NoteListState(
     DB::INotesRepository &repository
 ) noexcept
     : NoteAwareState(window, config, controller, repository),
-      m_selectedIndex(0), m_listWindow(nullptr), m_previewWindow(nullptr),
-      m_mode(Mode::NORMAL) {}
+      m_selectedIndex(0), m_view(nullptr), m_mode(Mode::NORMAL) {}
 
 void NoteListState::onEnter() {
+  wclear(m_window);
   loadNotes();
-  createWindow();
+  m_view = std::make_unique<UI::NoteContainer>(m_window, m_config);
 }
 
 void NoteListState::onExit() {
-  m_list.reset();
-  m_preview.reset();
-  m_statusBar.reset();
-  m_listWindow.reset();
-  m_previewWindow.reset();
+  m_view.reset();
   wclear(m_window);
 }
 
 std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
   switch (m_mode) {
-    case Mode::NORMAL: return handleNormal(key);
-    case Mode::SEARCH: return handleSearch(key);
-    case Mode::EDIT: return handleEdit(key);
+    case Mode::NORMAL: m_view->setMode(modeLabel()); return handleNormal(key);
+    case Mode::SEARCH: m_view->setMode(modeLabel()); return handleSearch(key);
+    case Mode::EDIT: m_view->setMode(modeLabel()); return handleEdit(key);
   }
 }
 
-void NoteListState::render() {
-  wclear(m_window);
-  wrefresh(m_window);
-  m_list->setSelectedIndex(m_selectedIndex);
-  m_list->draw(m_notes);
-  m_statusBar->setLabel(modeLabel());
-  m_statusBar->setInputBuffer(m_inputBuffer);
-  m_statusBar->draw();
-  if (!m_notes.empty()) {
-    m_preview->draw(m_notes[m_selectedIndex]);
-  }
-  wrefresh(m_window);
-}
+void NoteListState::render() { m_view->draw(m_notes, m_selectedIndex); }
 
 // ----- Private Methods -----
 
@@ -87,35 +69,6 @@ void NoteListState::moveDown() {
   if (m_notes.empty()) return;
   m_selectedIndex =
       std::min(static_cast<int>(m_notes.size()) - 1, m_selectedIndex + 1);
-}
-
-void NoteListState::createWindow() {
-  wclear(m_window);
-  int height = getmaxy(m_window);
-  int width = getmaxx(m_window);
-  int listWidth = width / 3;
-  int previewWidth = width - listWidth;
-  int margin = 2;
-
-  m_listWindow = std::make_unique<UI::SubWindow>(
-      m_window,
-      UI::Rect{.yPos = 0, .xPos = 0, .height = height, .width = listWidth}
-  );
-
-  m_previewWindow = std::make_unique<UI::SubWindow>(
-      m_window,
-      UI::Rect{
-          .yPos = margin,
-          .xPos = listWidth + margin,
-          .height = height - (margin * 2),
-          .width = previewWidth - (margin * 2)
-      }
-  );
-
-  m_list = std::make_unique<UI::NoteListWidget>(m_listWindow->get());
-  m_preview =
-      std::make_unique<UI::PreviewWidget>(m_previewWindow->get(), m_config);
-  m_statusBar = std::make_unique<UI::StatusBar>(m_listWindow->get());
 }
 
 std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
@@ -142,7 +95,7 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
         auto result = m_repository.update(note);
         return nullptr;
       };
-    case NormalAction::SEARCH: return nullptr;
+    case NormalAction::SEARCH: handleInput(key); return nullptr;
     case NormalAction::NEW_NOTE:
       return std::make_unique<NewNoteState>(
           m_window, m_config, m_controller, m_repository, m_notes

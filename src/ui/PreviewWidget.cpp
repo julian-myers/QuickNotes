@@ -12,25 +12,21 @@ namespace QuickNotes::UI {
 PreviewWidget::PreviewWidget(
     WINDOW *window, std::shared_ptr<const Config::Config> config
 )
-    : Widget(window), m_config(config) {}
+    : Widget(window), m_config(config),
+      m_innerWindow(window, {1, 1, getmaxy(window) - 2, getmaxx(window) - 2}) {}
 
-void PreviewWidget::draw(Model::Note &note) {
-  wclear(m_window);
+void PreviewWidget::draw(const Model::Note &note) {
+  clear();
+  drawBorder();
+  wclear(m_innerWindow.get());
   auto tokens = Markdown::Lexer(note.content).tokenize();
   auto ast = Markdown::Parser(std::move(tokens)).parse();
-  Markdown::Renderer renderer(m_window, *m_config);
+  Markdown::Renderer renderer(m_innerWindow.get(), *m_config);
   renderer.visit(*ast.root);
+  wnoutrefresh(m_innerWindow.get());
   wnoutrefresh(m_window);
 }
 
 void PreviewWidget::draw() {}
-
-// int PreviewWidget::windowWidth() { return m_windowWidth; }
-//
-// int PreviewWidget::windowHeight() { return m_windowHeight; }
-//
-// int PreviewWidget::startingRow() { return m_startRow; }
-//
-// int PreviewWidget::startingColumn() { return m_startColumn; }
 
 } // namespace QuickNotes::UI

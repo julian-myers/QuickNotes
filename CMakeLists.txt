@@ -65,6 +65,8 @@ set(UI_SOURCES
 	src/ui/DeleteConfirmWidget.cpp
 	src/ui/DialogBox.cpp
 	src/ui/StatusBar.cpp
+	src/ui/NoteContainer.cpp
+	src/ui/SearchBar.cpp
 )
 
 set(DB_SOURCES

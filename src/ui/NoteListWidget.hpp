@@ -18,21 +18,11 @@ class NoteListWidget : public Widget {
 
     /// @brief draw content to window.
     /// @param notes list of notes to display.
-    void draw(Notes notes);
-
-    void setSelectedIndex(int index);
+    void draw(Notes notes, int selectedIndex);
 
     /// @brief Get the selected index.
     /// @return the index of the note list that gets selected.
     int selectedIndex();
-
-    /// @brief Get the width of the window.
-    /// @return Width of window measured in terminal characters.
-    int windowWidth();
-
-    /// @brief Get the height of the window.
-    /// @return Height of window measured in terminal characters.
-    int windowHeight();
 
     /// @brief Get the beginning row of the window.
     /// @return row number of window.
@@ -41,10 +31,6 @@ class NoteListWidget : public Widget {
     /// @brief Get the beginning column of the window.
     /// @return column number of window.
     int startingColumn();
-
-  private:
-    int m_selectedIndex;
-    int m_windowWidth, m_windowHeight, m_startRow, m_startColumn;
 };
 
 } // namespace QuickNotes::UI

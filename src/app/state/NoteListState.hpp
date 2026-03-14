@@ -5,10 +5,7 @@
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
 #include "models/Notes.hpp"
-#include "ui/NoteListWidget.hpp"
-#include "ui/PreviewWidget.hpp"
-#include "ui/StatusBar.hpp"
-#include "ui/Subwindow.hpp"
+#include "ui/NoteContainer.hpp"
 #include <memory>
 #include <ncurses.h>
 #include <string_view>
@@ -64,12 +61,9 @@ class NoteListState : public NoteAwareState {
     int m_selectedIndex;
     std::string m_inputBuffer;
     std::vector<Model::Note> m_filtered;
-    std::unique_ptr<UI::SubWindow> m_listWindow;
-    std::unique_ptr<UI::SubWindow> m_previewWindow;
-    std::unique_ptr<UI::StatusBar> m_statusBar;
-    std::unique_ptr<UI::NoteListWidget> m_list;
-    std::unique_ptr<UI::PreviewWidget> m_preview;
     std::vector<Model::Note> m_notes;
+    std::unique_ptr<UI::NoteContainer> m_view;
+
     using Binding = std::pair<Config::Action, NormalAction>;
     static const std::vector<Binding> m_keyMap;
 
@@ -84,8 +78,6 @@ class NoteListState : public NoteAwareState {
     void moveUp() override;
 
     void moveDown() override;
-
-    void createWindow();
 
     void loadNotes();
 };
