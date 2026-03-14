@@ -37,9 +37,6 @@ class Widget {
     /// @param window Pointer to the resized ncurses WINDOW.
     virtual void resize(WINDOW *window) { m_window = window; }
 
-  protected:
-    void clear() { werase(m_window); }
-
     static void roundedBox(WINDOW *win) {
       static const cchar_t ls = {0, L"│"};
       static const cchar_t rs = {0, L"│"};
@@ -51,6 +48,9 @@ class Widget {
       static const cchar_t br = {0, L"╯"};
       wborder_set(win, &ls, &rs, &ts, &bs, &tl, &tr, &bl, &br);
     }
+
+  protected:
+    void clear() { werase(m_window); }
 
     void drawBorder() { roundedBox(m_window); }
 
