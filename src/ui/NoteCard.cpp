@@ -13,7 +13,7 @@ void NoteCard::draw(bool selected) {
   int w = getmaxx(win) - 2;
 
   wclear(win);
-
+  m_subWin.drawBorder();
   if (selected) wattron(win, A_REVERSE);
 
   wattron(win, A_BOLD);
@@ -28,6 +28,7 @@ void NoteCard::draw(bool selected) {
   mvwprintw(
       win, 3, 1, "Edited:  %-*s", w - 10, shortDate(m_note.updatedAt).c_str()
   );
+
   wnoutrefresh(win);
 }
 

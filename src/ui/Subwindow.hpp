@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Widget.hpp"
 #include <cstdlib>
 #include <ncurses.h>
 
@@ -55,6 +56,8 @@ class SubWindow {
     WINDOW *get() const { return m_window; }
 
     const Rect &rect() const { return m_rect; }
+
+    void drawBorder() { Widget::roundedBox(m_window); };
 
   private:
     Rect m_rect;

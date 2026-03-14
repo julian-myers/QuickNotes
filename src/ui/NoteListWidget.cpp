@@ -46,7 +46,7 @@ void NoteListWidget::rebuildCards(const Notes &notes) {
   for (int i = 0; i < static_cast<int>(notes.size()); ++i) {
     int row = HEADER_HEIGHT + i * NoteCard::HEIGHT;
     if (row + NoteCard::HEIGHT - 1 >= height()) break;
-    Rect rect{row, 2, NoteCard::HEIGHT - 1, width() - 4};
+    Rect rect{row, 2, NoteCard::HEIGHT, width() - 4};
     m_cards.emplace_back(m_window, rect, notes[i]);
   }
 }
