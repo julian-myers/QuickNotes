@@ -142,14 +142,212 @@ TEST(HoriontalRuleTest, ManyDashesProducesRule) {
 
 // --- Unordered List ---
 
+TEST(UnorderedListTest, DashSpaceIsListBullet) {
+  auto tokens = lex("- item");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::LIST_BULLET);
+}
+
+TEST(UnorderedListTest, BulletFollowedByText) {
+  auto tokens = lex("- item");
+  ASSERT_GE(tokens.size(), 2u);
+  EXPECT_EQ(tokens[0].type, TokenType::LIST_BULLET);
+  EXPECT_EQ(tokens[1].type, TokenType::TEXT);
+  EXPECT_EQ(tokens[1].value, "item");
+}
+
+TEST(UnorderedListTest, DashWithoutSpaceIsPlainText) {
+  auto tokens = lex("-nospace");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::TEXT);
+}
+
+TEST(UnorderedListTest, MultipleBulletsProduceMultipleTokens) {
+  auto tokens = lex("- one\n- two\n- three");
+  auto t = types(tokens);
+  EXPECT_EQ(std::count(t.begin(), t.end(), TokenType::LIST_BULLET), 3);
+}
+
 // --- Ordered List ---
+
+TEST(OrderedListTest, NumberDotSpaceIsListOrdered) {
+  auto tokens = lex("1. item");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::LIST_ORDERED);
+}
+
+TEST(OrderedListTest, OrderedListTokenCarriesNumber) {
+  auto tokens = lex("1. item");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].value, "1");
+}
+
+TEST(OrderedListTest, MultiDigitNumberIsPreserved) {
+  auto tokens = lex("42. item");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::LIST_ORDERED);
+  EXPECT_EQ(tokens[0].value, "42");
+}
+
+TEST(OrderedListTest, NumberDotWithoutSpaceIsPlainText) {
+  auto tokens = lex("1.nospace");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::TEXT);
+}
+
+TEST(OrderedListTest, MultipleOrderedItemsProduceMultipleTokens) {
+  auto tokens = lex("1. one\n2. two\n3. three");
+  auto t = types(tokens);
+  EXPECT_EQ(std::count(t.begin(), t.end(), TokenType::LIST_ORDERED), 3);
+}
 
 // --- Code Blocks ---
 
+TEST(CodeBlockTest, TripleBacktickProducesCodeFence) {
+  auto tokens = lex("```\ncode\n```");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::CODE_FENCE), t.end());
+}
+
+TEST(CodeBlockTest, CodeFenceWithLanguageProducesLangToken) {
+  auto tokens = lex("```cpp\ncode\n```");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::CODE_FENCE_LANG), t.end());
+}
+
+TEST(CodeBlockTest, CodeFenceLangTokenCarriesLanguageName) {
+  auto tokens = lex("```cpp\ncode\n```");
+  auto it = std::find_if(tokens.begin(), tokens.end(), [](const Token &tok) {
+    return tok.type == TokenType::CODE_FENCE_LANG;
+  });
+  ASSERT_NE(it, tokens.end());
+  EXPECT_EQ(it->value, "cpp");
+}
+
+TEST(CodeBlockTest, CodeBlockContentProducesTextToken) {
+  auto tokens = lex("```\nhello world\n```");
+  auto it = std::find_if(tokens.begin(), tokens.end(), [](const Token &tok) {
+    return tok.type == TokenType::TEXT;
+  });
+  ASSERT_NE(it, tokens.end());
+  EXPECT_EQ(it->value, "hello world");
+}
+
+TEST(CodeBlockTest, InlineCodeProducesInlineCodeToken) {
+  auto tokens = lex("`code`");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::INLINE_CODE);
+}
+
+TEST(CodeBlockTest, InlineCodeCarriesValue) {
+  auto tokens = lex("`some_func()`");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].value, "some_func()");
+}
+
 // --- Tables ---
+
+TEST(TableTest, PipeProducesTablePipe) {
+  auto tokens = lex("| cell |");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TABLE_PIPE), t.end());
+}
+
+TEST(TableTest, TableRowProducesTextToken) {
+  auto tokens = lex("| hello |");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TEXT), t.end());
+  auto it = std::find_if(tokens.begin(), tokens.end(), [](const Token &tok) {
+    return tok.type == TokenType::TEXT;
+  });
+  EXPECT_EQ(it->value, "hello");
+}
+
+TEST(TableTest, DelimiterRowProducesTableDelimiterToken) {
+  auto tokens = lex("| --- |");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TABLE_DELIMITER), t.end());
+}
+
+TEST(TableTest, MultiColumnRowProducesMultiplePipes) {
+  auto tokens = lex("| a | b | c |");
+  auto t = types(tokens);
+  EXPECT_GE(std::count(t.begin(), t.end(), TokenType::TABLE_PIPE), 3);
+}
 
 // --- Plain Text ---
 
-// --- Line / Column tracking ---
+TEST(PlainTextTest, BasicTextProducesTextToken) {
+  auto tokens = lex("hello world");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::TEXT);
+  EXPECT_EQ(tokens[0].value, "hello world");
+}
 
-// --- Multi-element documents ---
+TEST(PlainTextTest, EmphasisInnerTextIsTextToken) {
+  auto tokens = lex("**bold**");
+  ASSERT_GE(tokens.size(), 2u);
+  EXPECT_EQ(tokens[1].type, TokenType::TEXT);
+  EXPECT_EQ(tokens[1].value, "bold");
+}
+
+TEST(PlainTextTest, TextWithSpecialCharsIsPreserved) {
+  auto tokens = lex("hello, world! (2024)");
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].type, TokenType::TEXT);
+  EXPECT_EQ(tokens[0].value, "hello, world! (2024)");
+}
+
+// --- Line / Column Tracking ---
+
+class LineColumnTest : public ::testing::Test {};
+
+TEST_F(LineColumnTest, FirstTokenIsOnLineOne) {
+  Lexer lexer("hello");
+  auto tokens = lexer.tokenize();
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].line, 1);
+}
+
+TEST_F(LineColumnTest, FirstTokenStartsAtColumnOne) {
+  Lexer lexer("hello");
+  auto tokens = lexer.tokenize();
+  ASSERT_FALSE(tokens.empty());
+  EXPECT_EQ(tokens[0].column, 1);
+}
+
+TEST_F(LineColumnTest, TokenAfterNewlineIsOnNextLine) {
+  Lexer lexer("first\nsecond");
+  auto tokens = lexer.tokenize();
+  // find the TEXT token with value "second"
+  auto it = std::find_if(tokens.begin(), tokens.end(), [](const Token &tok) {
+    return tok.type == TokenType::TEXT && tok.value == "second";
+  });
+  ASSERT_NE(it, tokens.end());
+  EXPECT_EQ(it->line, 2);
+}
+
+// --- Multi-element Documents ---
+
+TEST(MultiElementTest, HeadingFollowedByParagraph) {
+  auto tokens = lex("# Title\n\nsome text");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HEADING_1), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::BLANK_LINE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TEXT), t.end());
+}
+
+TEST(MultiElementTest, ListAfterParagraphProducesBothTypes) {
+  auto tokens = lex("Some intro.\n\n- item one\n- item two");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TEXT), t.end());
+  EXPECT_EQ(std::count(t.begin(), t.end(), TokenType::LIST_BULLET), 2);
+}
+
+TEST(MultiElementTest, MixedBlocksProduceCorrectTokenSequence) {
+  auto tokens = lex("# H1\n\n---\n\n> quote");
+  auto t = types(tokens);
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HEADING_1), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HORIZONTAL_RULE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::BLOCK_QUOTE), t.end());
+}
