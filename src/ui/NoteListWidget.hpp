@@ -21,6 +21,10 @@ class NoteListWidget : public Widget {
     /// @param notes list of notes to display.
     void draw(const Notes &notes, int selectedIndex);
 
+    /// @brief draw content to window.
+    /// @param notes list of notes to display.
+    void draw(const Notes &notes);
+
     /// @brief Get the selected index.
     /// @return the index of the note list that gets selected.
     int selectedIndex();

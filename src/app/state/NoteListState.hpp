@@ -43,7 +43,7 @@ class NoteListState : public NoteAwareState {
     std::string name() const override { return "NoteListState"; }
 
   private:
-    enum class Mode { NORMAL, SEARCH, EDIT };
+    enum class Mode { NORMAL, SEARCH };
 
     enum class NormalAction {
       MOVE_UP,
@@ -57,25 +57,29 @@ class NoteListState : public NoteAwareState {
       NONE,
     };
 
-    Mode m_mode = Mode::NORMAL;
     int m_selectedIndex;
+    Mode m_mode = Mode::NORMAL;
+    std::string m_query;
     std::string m_inputBuffer;
     std::vector<Model::Note> m_notes;
+    std::vector<Model::Note> m_results;
     std::unique_ptr<UI::NoteContainer> m_view;
 
     using Binding = std::pair<Config::Action, NormalAction>;
     static const std::vector<Binding> m_keyMap;
 
     std::unique_ptr<AbstractState> handleNormal(int key);
+    std::unique_ptr<AbstractState> handleSearch(int key);
 
-    std::unique_ptr<AbstractState> handleEdit(int key);
+    void enterSearchMode();
+    void exitSearchMode();
+    void updateSearch();
 
+    std::vector<Model::Note> &activeNotes();
     std::string_view modeLabel() const;
 
     void moveUp() override;
-
     void moveDown() override;
-
     void loadNotes();
 };
 } // namespace QuickNotes::App::State

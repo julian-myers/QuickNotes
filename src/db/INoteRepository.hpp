@@ -70,6 +70,14 @@ class INotesRepository {
     /// @return A vector of size amount containing the most recently edited
     /// notes ordered by updated_at descending.
     virtual std::vector<Model::Note> findMostRecent(int amount) = 0;
+
+    /// @brief Find all notes whose title partially/fully matches the query
+    /// string.
+    ///
+    /// @param query the title of the note the user is searching for. Can be
+    /// partial.
+    /// @return a vector<Model::Note> of potential matches.
+    virtual std::vector<Model::Note> findByTitle(const std::string &query) = 0;
 };
 
 } // namespace QuickNotes::DB

@@ -17,18 +17,23 @@ namespace QuickNotes::UI {
 class NoteContainer : public Widget {
 
   public:
+    using Notes = const std::vector<Model::Note>;
+
     explicit NoteContainer(
         WINDOW *window, std::shared_ptr<const Config::Config> config
     );
 
-    void draw(const std::vector<Model::Note> &notes, int selectedIndex);
+    void draw(Notes &notes, int selectedIndex);
+    void draw(Notes &notes, int selectedIndex, std::string_view input);
     void draw() override;
     void resize(WINDOW *window) override;
     void setMode(std::string_view mode);
 
   private:
-    std::string m_modeLabel = "--- NORMAL ----";
+    enum class Mode { NORMAL, SEARCH, EDIT };
 
+    std::string m_modeLabel = "---- NORMAL ----";
+    Mode m_mode;
     std::shared_ptr<const Config::Config> m_config;
     std::unique_ptr<NoteListWidget> m_list;
     std::unique_ptr<PreviewWidget> m_preview;

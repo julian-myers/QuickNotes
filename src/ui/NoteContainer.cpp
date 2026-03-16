@@ -1,6 +1,5 @@
 #include "ui/NoteContainer.hpp"
 #include "config/Config.hpp"
-#include "models/Notes.hpp"
 #include "ui/NoteListWidget.hpp"
 #include "ui/PreviewWidget.hpp"
 #include "ui/SearchBar.hpp"
@@ -29,9 +28,7 @@ NoteContainer::NoteContainer(
   m_searchBar = std::make_unique<SearchBar>(m_searchWindow.get());
 }
 
-void NoteContainer::draw(
-    const std::vector<Model::Note> &notes, int selectedIndex
-) {
+void NoteContainer::draw(Notes &notes, int selectedIndex) {
   clear();
   m_list->draw(notes, selectedIndex);
   if (!notes.empty()) {
@@ -39,6 +36,21 @@ void NoteContainer::draw(
   }
   m_statusBar->setLabel(m_modeLabel);
   m_statusBar->draw();
+  m_searchBar->draw();
+  wnoutrefresh(m_window);
+}
+
+void NoteContainer::draw(
+    Notes &results, int selectedIndex, std::string_view input
+) {
+  clear();
+  m_list->draw(results);
+  if (!results.empty()) {
+    m_preview->draw(results[selectedIndex]);
+  }
+  m_statusBar->setLabel(m_modeLabel);
+  m_statusBar->draw();
+  m_searchBar->setInputBuffer(input);
   m_searchBar->draw();
   wnoutrefresh(m_window);
 }
@@ -82,7 +94,5 @@ Rect NoteContainer::statusBarRect(WINDOW *w) {
   const int height = getmaxy(w);
   return {.yPos = height - 1, .xPos = 0, .height = 1, .width = width};
 }
-
-// --- Private ---
 
 } // namespace QuickNotes::UI

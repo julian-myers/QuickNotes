@@ -102,6 +102,19 @@ std::vector<Model::Note> NotesRepository::findMostRecent(int amount) {
   return collect(s);
 }
 
+std::vector<Model::Note>
+NotesRepository::findByTitle(const std::string &query) {
+  const std::string sqlQuery =
+      "SELECT id, title, content, created_at, updated_at "
+      "FROM notes "
+      "WHERE title "
+      "LIKE ?";
+  const std::string pattern = "%" + query + "%";
+  auto s = prepare(sqlQuery);
+  sqlite3_bind_text(s.statement, 1, pattern.c_str(), -1, SQLITE_TRANSIENT);
+  return collect(s);
+}
+
 // ------- Private Methods -------
 
 Model::Note NotesRepository::toNote(sqlite3_stmt *statement) {

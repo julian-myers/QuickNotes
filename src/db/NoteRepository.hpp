@@ -84,12 +84,25 @@ class NotesRepository : public INotesRepository {
     /// @return An error string on failure.
     INotesRepository::NoteResult update(const Model::Note &note) override;
 
+    /// @brief Find all notes whose title partially/fully matches the query
+    /// string.
+    ///
+    /// @param query the title of the note the user is searching for. Can be
+    /// partial.
+    /// @return a vector<Model::Note> of potential matches.
+    std::vector<Model::Note> findByTitle(const std::string &query) override;
+
   private:
     /// @brief RAII wrapper for sqlite3_stmt.
     ///
     /// Deconstructor calls sqlite3_finalize.
     struct Statement {
         sqlite3_stmt *statement = nullptr;
+        Statement() = default;
+        Statement(const Statement &) = delete;
+        Statement &operator=(const Statement &) = delete;
+        Statement(Statement &&) = default;
+        Statement &operator=(Statement &&) = default;
         ~Statement() { sqlite3_finalize(statement); }
     };
 

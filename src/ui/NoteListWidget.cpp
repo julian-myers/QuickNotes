@@ -39,6 +39,33 @@ void NoteListWidget::draw(
   wnoutrefresh(m_window);
 }
 
+void NoteListWidget::draw(const std::vector<Model::Note> &notes) {
+  std::vector<int> ids;
+  ids.reserve(notes.size());
+  for (const auto &note : notes) {
+    ids.push_back(note.id);
+  }
+  if (ids != m_cachedIds) {
+    rebuildCards(notes);
+    m_cachedIds = std::move(ids);
+  }
+
+  clear();
+  int margin = 1;
+  drawBorder();
+  attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+  print(0, 2, " Notes:");
+  attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+
+  for (int i = 0; i < static_cast<int>(m_cards.size()); i++) {
+    int y = HEADER_HEIGHT + i * NoteCard::HEIGHT;
+    if (y + NoteCard::HEIGHT > height() - 1) break;
+    m_cards[i].draw(false);
+  }
+
+  wnoutrefresh(m_window);
+}
+
 void NoteListWidget::draw() {}
 
 void NoteListWidget::rebuildCards(const Notes &notes) {
