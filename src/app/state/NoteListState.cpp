@@ -1,9 +1,11 @@
 #include "app/state/NoteListState.hpp"
+#include "SearchingState.hpp"
 #include "app/Controller.hpp"
 #include "app/state/AbstractState.hpp"
 #include "app/state/DeleteNoteState.hpp"
 #include "app/state/NewNoteState.hpp"
 #include "app/state/NoteAwareState.hpp"
+#include "app/state/SearchingState.hpp"
 #include "app/state/ViewingState.hpp"
 #include "config/Config.hpp"
 #include "config/Editor.hpp"
@@ -41,7 +43,11 @@ void NoteListState::onExit() {
 std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
   switch (m_mode) {
     case Mode::NORMAL: m_view->setMode(modeLabel()); return handleNormal(key);
-    case Mode::SEARCH: m_view->setMode(modeLabel()); return handleSearch(key);
+    case Mode::SEARCH:
+      m_view->setMode(modeLabel());
+      return std::make_unique<SearchingState>(
+          m_window, m_config, m_controller, m_repository
+      );
     case Mode::EDIT: m_view->setMode(modeLabel()); return handleEdit(key);
   }
 }
@@ -112,11 +118,6 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
     case NormalAction::QUIT: m_controller.quit(); return nullptr;
     case NormalAction::NONE: return nullptr;
   }
-  return nullptr;
-}
-
-// TODO: write this.
-std::unique_ptr<AbstractState> NoteListState::handleSearch(int key) {
   return nullptr;
 }
 

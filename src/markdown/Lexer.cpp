@@ -252,6 +252,7 @@ void Lexer::readPipe(TokenListRef tokens) {
   m_state = LexerState::IN_TABLE;
 }
 
+
 void Lexer::readDash(TokenListRef tokens) {
 
   auto isHorizontalRule = [&]() {

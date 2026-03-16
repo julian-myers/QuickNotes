@@ -67,6 +67,7 @@ set(UI_SOURCES
 	src/ui/StatusBar.cpp
 	src/ui/NoteContainer.cpp
 	src/ui/SearchBar.cpp
+	src/ui/NoteCard.cpp
 )
 
 set(DB_SOURCES

@@ -1,4 +1,5 @@
 #include "ui/SearchBar.hpp"
+#include "markdown/Colors.hpp"
 #include "ui/Widget.hpp"
 #include <string_view>
 
@@ -16,6 +17,9 @@ void SearchBar::draw() {
   clear();
   int margin = 1;
   drawBorder();
+  attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+  print(0, 2, "Search: \'/\'");
+  attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
   print(1, 2, m_inputBuffer);
   wnoutrefresh(m_window);
 }

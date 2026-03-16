@@ -58,10 +58,10 @@ class AbstractState {
     virtual std::string name() const = 0;
 
   protected:
+    using ConfigPtr = std::shared_ptr<const Config::Config>;
+
     explicit AbstractState(
-        WINDOW *window,
-        std::shared_ptr<const Config::Config> config,
-        IAppController &controller
+        WINDOW *window, ConfigPtr config, IAppController &controller
     )
         : m_window(window), m_config(config), m_controller(controller),
           m_cursorPosition(0) {};

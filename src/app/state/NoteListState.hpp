@@ -60,7 +60,6 @@ class NoteListState : public NoteAwareState {
     Mode m_mode = Mode::NORMAL;
     int m_selectedIndex;
     std::string m_inputBuffer;
-    std::vector<Model::Note> m_filtered;
     std::vector<Model::Note> m_notes;
     std::unique_ptr<UI::NoteContainer> m_view;
 
@@ -68,8 +67,6 @@ class NoteListState : public NoteAwareState {
     static const std::vector<Binding> m_keyMap;
 
     std::unique_ptr<AbstractState> handleNormal(int key);
-
-    std::unique_ptr<AbstractState> handleSearch(int key);
 
     std::unique_ptr<AbstractState> handleEdit(int key);
 
