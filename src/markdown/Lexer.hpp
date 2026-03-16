@@ -124,6 +124,14 @@ class Lexer {
     /// @see TokenType
     Token makeToken(TokenType type, std::string value = "");
 
+    /// @brief Instantiate a Token with an explicit source position.
+    /// @param type One of the members of the TokenType enum.
+    /// @param line The line number where the token begins.
+    /// @param col The column number where the token begins.
+    /// @param value The string the value field should hold.
+    /// @return An instance of Token.
+    Token makeToken(TokenType type, int line, int col, std::string value = "");
+
     /// @brief Handle the current state of the lexer.
     /// @param tokens A reference to the vector of tokens.
     /// @throws std::runtime_error if value of m_state is not a valid lexer

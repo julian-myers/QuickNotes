@@ -54,6 +54,10 @@ Token Lexer::makeToken(TokenType type, std::string value) {
   return Token{type, std::move(value), m_line, m_column};
 }
 
+Token Lexer::makeToken(TokenType type, int line, int col, std::string value) {
+  return Token{type, std::move(value), line, col};
+}
+
 using TokenList = std::vector<Token>;
 using TokenListRef = std::vector<Token> &;
 
@@ -95,6 +99,7 @@ void Lexer::handleCodeBlockState(TokenListRef tokens) {
            m_position + 2 < m_source.size() &&
            m_source[m_position + 2] == BACK_TICK;
   };
+  int line = m_line, col = m_column;
   while (!isAtEnd()) {
     if (isCodeBlockDelimiter()) {
       advance();
@@ -103,17 +108,20 @@ void Lexer::handleCodeBlockState(TokenListRef tokens) {
       while (peek() != NEW_LINE_CHAR && !isAtEnd()) {
         advance();
       }
-      tokens.push_back(makeToken(TokenType::TEXT, std::move(code)));
-      tokens.push_back(makeToken(TokenType::CODE_FENCE));
+      if (!code.empty() && code.back() == '\n') {
+        code.pop_back();
+      }
+      tokens.push_back(makeToken(TokenType::TEXT, line, col, std::move(code)));
+      tokens.push_back(makeToken(TokenType::CODE_FENCE, m_line, m_column));
       m_state = LexerState::DEFAULT;
       return;
     }
     code += advance();
   }
   if (!code.empty()) {
-    tokens.push_back(makeToken(TokenType::TEXT, std::move(code)));
+    tokens.push_back(makeToken(TokenType::TEXT, line, col, std::move(code)));
   }
-  tokens.push_back(makeToken(TokenType::CODE_FENCE));
+  tokens.push_back(makeToken(TokenType::CODE_FENCE, line, col));
   m_state = LexerState::DEFAULT;
 }
 
@@ -131,15 +139,16 @@ void Lexer::handleTableState(TokenListRef tokens) {
         [&]() { m_state = LexerState::DEFAULT; }},
        {[](char c) { return c == NEW_LINE_CHAR; },
         [&]() {
+          int line = m_line, col = m_column;
           advance();
           if (peek() == NEW_LINE_CHAR) {
             advance();
-            tokens.push_back(makeToken(TokenType::BLANK_LINE));
+            tokens.push_back(makeToken(TokenType::BLANK_LINE, line, col));
             m_state = LexerState::DEFAULT;
             return;
           }
 
-          tokens.push_back(makeToken(TokenType::NEWLINE));
+          tokens.push_back(makeToken(TokenType::NEWLINE, line, col));
           size_t savedPosition = m_position;
           int savedLine = m_line;
           int savedColumn = m_column;
@@ -156,8 +165,9 @@ void Lexer::handleTableState(TokenListRef tokens) {
         }},
        {[](char c) { return c == PIPE; },
         [&]() {
+          int line = m_line, col = m_column;
           advance();
-          tokens.push_back(makeToken(TokenType::TABLE_PIPE));
+          tokens.push_back(makeToken(TokenType::TABLE_PIPE, line, col));
           while (peek() == SPACE || peek() == TAB) {
             advance();
           }
@@ -177,19 +187,21 @@ void Lexer::handleTableState(TokenListRef tokens) {
 
 void Lexer::readNewLine(TokenListRef tokens) {
   if (isAtEnd() || peek() == NULL_CHAR) return;
+  int line = m_line, col = m_column;
   advance();
   if (peek() == NEW_LINE_CHAR) {
     while (peek() == NEW_LINE_CHAR) {
       advance();
     }
-    tokens.push_back(makeToken(TokenType::BLANK_LINE));
+    tokens.push_back(makeToken(TokenType::BLANK_LINE, line, col));
     m_state = LexerState::DEFAULT;
     return;
   }
-  tokens.push_back(makeToken(TokenType::NEWLINE));
+  tokens.push_back(makeToken(TokenType::NEWLINE, line, col));
 }
 
 void Lexer::readHeading(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   int level = 0;
 
   while (peek() == POUND_SIGN) {
@@ -198,18 +210,18 @@ void Lexer::readHeading(TokenListRef tokens) {
   }
 
   if (level > MAX_HEADER_DEPTH || peek() != SPACE) {
-    tokens.push_back(makeToken(TokenType::TEXT));
+    tokens.push_back(makeToken(TokenType::TEXT, line, col));
     m_state = LexerState::DEFAULT;
     return;
   }
-
+  advance(); // consume the space !
   switch (level) {
-    case 1: tokens.push_back(makeToken(TokenType::HEADING_1)); break;
-    case 2: tokens.push_back(makeToken(TokenType::HEADING_2)); break;
-    case 3: tokens.push_back(makeToken(TokenType::HEADING_3)); break;
-    case 4: tokens.push_back(makeToken(TokenType::HEADING_4)); break;
-    case 5: tokens.push_back(makeToken(TokenType::HEADING_5)); break;
-    case 6: tokens.push_back(makeToken(TokenType::HEADING_6)); break;
+    case 1: tokens.push_back(makeToken(TokenType::HEADING_1, line, col)); break;
+    case 2: tokens.push_back(makeToken(TokenType::HEADING_2, line, col)); break;
+    case 3: tokens.push_back(makeToken(TokenType::HEADING_3, line, col)); break;
+    case 4: tokens.push_back(makeToken(TokenType::HEADING_4, line, col)); break;
+    case 5: tokens.push_back(makeToken(TokenType::HEADING_5, line, col)); break;
+    case 6: tokens.push_back(makeToken(TokenType::HEADING_6, line, col)); break;
   }
 }
 
@@ -221,6 +233,33 @@ void Lexer::readBlockQuote(TokenListRef tokens) {
 }
 
 void Lexer::readBackTick(TokenListRef tokens) {
+  int line = m_line, col = m_column;
+
+  if (peekNext() == BACK_TICK && m_position + 2 < m_source.size() &&
+      m_source[m_position + 2] == BACK_TICK) {
+    advance();
+    advance();
+    advance();
+    tokens.push_back(makeToken(TokenType::CODE_FENCE, line, col));
+
+    std::string lang;
+    while (!isAtEnd() && peek() != NEW_LINE_CHAR) {
+      lang += advance();
+    }
+
+    if (!isAtEnd() && peek() == NEW_LINE_CHAR) {
+      advance();
+    }
+
+    if (!lang.empty()) {
+      tokens.push_back(
+          makeToken(TokenType::CODE_FENCE_LANG, line, col, std::move(lang))
+      );
+    }
+    m_state = LexerState::IN_CODE_BLOCK;
+    return;
+  }
+
   advance();
   std::string code;
   while (!isAtEnd() && peek() != BACK_TICK && peek() != NEW_LINE_CHAR) {
@@ -229,10 +268,13 @@ void Lexer::readBackTick(TokenListRef tokens) {
   if (peek() == BACK_TICK) {
     advance();
   }
-  tokens.push_back(makeToken(TokenType::INLINE_CODE, std::move(code)));
+  tokens.push_back(
+      makeToken(TokenType::INLINE_CODE, line, col, std::move(code))
+  );
 }
 
 void Lexer::readEmphasis(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   int count = 0;
   while (peek() == ASTERIX) {
     advance();
@@ -240,21 +282,24 @@ void Lexer::readEmphasis(TokenListRef tokens) {
   }
 
   switch (count) {
-    case 1: tokens.push_back(makeToken(TokenType::ITALIC)); break;
-    case 2: tokens.push_back(makeToken(TokenType::BOLD)); break;
-    case 3: tokens.push_back(makeToken(TokenType::BOLD_ITALIC)); break;
+    case 1: tokens.push_back(makeToken(TokenType::ITALIC, line, col)); break;
+    case 2: tokens.push_back(makeToken(TokenType::BOLD, line, col)); break;
+    case 3:
+      tokens.push_back(makeToken(TokenType::BOLD_ITALIC, line, col));
+      break;
   }
 }
 
 void Lexer::readPipe(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   advance();
-  tokens.push_back(makeToken(TokenType::TABLE_PIPE));
+  tokens.push_back(makeToken(TokenType::TABLE_PIPE, line, col));
   m_state = LexerState::IN_TABLE;
 }
 
-
 void Lexer::readDash(TokenListRef tokens) {
 
+  int line = m_line, col = m_column;
   auto isHorizontalRule = [&]() {
     return peek() == DASH && peekNext() == DASH &&
            m_position + 2 < m_source.size() && m_source[m_position + 2] == DASH;
@@ -264,15 +309,15 @@ void Lexer::readDash(TokenListRef tokens) {
     do {
       advance();
     } while (peek() != NEW_LINE_CHAR && !isAtEnd());
-    tokens.push_back(makeToken(TokenType::HORIZONTAL_RULE));
-    tokens.push_back(makeToken(TokenType::NEWLINE));
+    tokens.push_back(makeToken(TokenType::HORIZONTAL_RULE, line, col));
+    tokens.push_back(makeToken(TokenType::NEWLINE, m_line, m_column));
     return;
   }
 
   if (peek() == DASH && peekNext() == SPACE) {
     advance();
     advance();
-    tokens.push_back(makeToken(TokenType::LIST_BULLET));
+    tokens.push_back(makeToken(TokenType::LIST_BULLET, line, col));
     return;
   }
 
@@ -280,6 +325,7 @@ void Lexer::readDash(TokenListRef tokens) {
 }
 
 void Lexer::readOrderedList(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   size_t savedPosition = m_position;
   int savedLine = m_line;
   int savedColumn = m_column;
@@ -299,10 +345,13 @@ void Lexer::readOrderedList(TokenListRef tokens) {
   advance();
   advance();
 
-  tokens.push_back(makeToken(TokenType::LIST_ORDERED, std::move(number)));
+  tokens.push_back(
+      makeToken(TokenType::LIST_ORDERED, line, col, std::move(number))
+  );
 }
 
 void Lexer::readText(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   std::string text;
 
   while (!isAtEnd()) {
@@ -315,10 +364,11 @@ void Lexer::readText(TokenListRef tokens) {
   }
 
   if (!text.empty())
-    tokens.push_back(makeToken(TokenType::TEXT, std::move(text)));
+    tokens.push_back(makeToken(TokenType::TEXT, line, col, std::move(text)));
 }
 
 void Lexer::readTableDelimiter(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   std::string delimiter;
 
   while (!isAtEnd() && peek() != PIPE && peek() != NEW_LINE_CHAR)
@@ -330,10 +380,13 @@ void Lexer::readTableDelimiter(TokenListRef tokens) {
   if (start != std::string::npos)
     delimiter = delimiter.substr(start, end - start + 1);
 
-  tokens.push_back(makeToken(TokenType::TABLE_DELIMITER, std::move(delimiter)));
+  tokens.push_back(
+      makeToken(TokenType::TABLE_DELIMITER, line, col, std::move(delimiter))
+  );
 }
 
 void Lexer::readTableCell(TokenListRef tokens) {
+  int line = m_line, col = m_column;
   std::string cell;
 
   while (!isAtEnd() && peek() != PIPE && peek() != NEW_LINE_CHAR)
@@ -343,7 +396,7 @@ void Lexer::readTableCell(TokenListRef tokens) {
   if (end != std::string::npos) cell = cell.substr(0, end + 1);
 
   if (!cell.empty())
-    tokens.push_back(makeToken(TokenType::TEXT, std::move(cell)));
+    tokens.push_back(makeToken(TokenType::TEXT, line, col, std::move(cell)));
 }
 
 // -- Public Methods -- //

@@ -264,7 +264,7 @@ TEST(TableTest, TableRowProducesTextToken) {
 }
 
 TEST(TableTest, DelimiterRowProducesTableDelimiterToken) {
-  auto tokens = lex("| --- |");
+  auto tokens = lex("| col |\n| --- |");
   auto t = types(tokens);
   EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TABLE_DELIMITER), t.end());
 }
@@ -350,4 +350,44 @@ TEST(MultiElementTest, MixedBlocksProduceCorrectTokenSequence) {
   EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HEADING_1), t.end());
   EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HORIZONTAL_RULE), t.end());
   EXPECT_NE(std::find(t.begin(), t.end(), TokenType::BLOCK_QUOTE), t.end());
+}
+
+TEST(MultiElementTest, FullDocument) {
+  const std::string doc =
+      "# Heading\n"
+      "\n"
+      "Some **bold** and *italic* text with `inline code`.\n"
+      "\n"
+      "> A block quote.\n"
+      "\n"
+      "- item one\n"
+      "- item two\n"
+      "\n"
+      "1. first\n"
+      "2. second\n"
+      "\n"
+      "---\n"
+      "\n"
+      "```cpp\n"
+      "int x = 0;\n"
+      "```\n"
+      "\n"
+      "| Name  | Age |\n"
+      "| :---- | --: |\n"
+      "| Alice | 30  |\n";
+
+  auto t = types(lex(doc));
+
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HEADING_1), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::BOLD), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::ITALIC), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::INLINE_CODE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::BLOCK_QUOTE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::LIST_BULLET), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::LIST_ORDERED), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::HORIZONTAL_RULE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::CODE_FENCE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::CODE_FENCE_LANG), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TABLE_PIPE), t.end());
+  EXPECT_NE(std::find(t.begin(), t.end(), TokenType::TABLE_DELIMITER), t.end());
 }

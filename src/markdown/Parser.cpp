@@ -83,20 +83,13 @@ void Parser::dispatch(AST &tree) {
 
 int Parser::headingLevel(TokenType type) {
   switch (type) {
-    case TokenType::HEADING_1:
-      return 1;
-    case TokenType::HEADING_2:
-      return 2;
-    case TokenType::HEADING_3:
-      return 3;
-    case TokenType::HEADING_4:
-      return 4;
-    case TokenType::HEADING_5:
-      return 5;
-    case TokenType::HEADING_6:
-      return 6;
-    default:
-      return 1;
+    case TokenType::HEADING_1: return 1;
+    case TokenType::HEADING_2: return 2;
+    case TokenType::HEADING_3: return 3;
+    case TokenType::HEADING_4: return 4;
+    case TokenType::HEADING_5: return 5;
+    case TokenType::HEADING_6: return 6;
+    default: return 1;
   }
 }
 
@@ -158,8 +151,8 @@ std::unique_ptr<BlockQuoteNode> Parser::parseBlockQuote() {
 
 std::unique_ptr<ListNode> Parser::parseList() {
   Token &first = advance();
-  ListKind kind = (first.type == TokenType::LIST_BULLET) ? ListKind::UNORDERED
-                                                         : ListKind::ORDERED;
+  ListKind kind = (first.type == TokenType::LIST_BULLET) ? ListKind::UNORDERED :
+                                                           ListKind::ORDERED;
   auto node = std::make_unique<ListNode>(kind);
   node->items.push_back(parseListItem(first));
   auto isListItem = [&] {
@@ -181,6 +174,9 @@ std::unique_ptr<CodeBlockNode> Parser::parseCodeBlock() {
   }
   if (!isAtEnd() && peek().type == TokenType::TEXT) {
     node->children.push_back(std::make_unique<TextNode>(advance().value));
+  }
+  if (!isAtEnd() && peek().type == TokenType::CODE_FENCE) {
+    advance();
   }
   return node;
 }
@@ -279,21 +275,11 @@ void Parser::parseInLine(std::vector<std::unique_ptr<Node>> &children) {
       case TokenType::TEXT:
         children.push_back(std::make_unique<TextNode>(advance().value));
         break;
-      case TokenType::BOLD:
-        children.push_back(parseBold());
-        break;
-      case TokenType::ITALIC:
-        children.push_back(parseItalic());
-        break;
-      case TokenType::BOLD_ITALIC:
-        children.push_back(parseItalicBold());
-        break;
-      case TokenType::INLINE_CODE:
-        children.push_back(parseInLineCode());
-        break;
-      default:
-        advance();
-        break;
+      case TokenType::BOLD: children.push_back(parseBold()); break;
+      case TokenType::ITALIC: children.push_back(parseItalic()); break;
+      case TokenType::BOLD_ITALIC: children.push_back(parseItalicBold()); break;
+      case TokenType::INLINE_CODE: children.push_back(parseInLineCode()); break;
+      default: advance(); break;
     }
   }
 }

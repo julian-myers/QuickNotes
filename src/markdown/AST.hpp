@@ -180,9 +180,9 @@ struct HorizontalRuleNode : Node {
 };
 
 struct TextNode : Node {
-    std::string text;
+    std::string value;
 
-    explicit TextNode(std::string text) : text(std::move(text)) {}
+    explicit TextNode(std::string text) : value(std::move(text)) {}
     /// @inheritdoc
     void accept(IVisitor &visitor) const override { visitor.visit(*this); }
 };
@@ -208,9 +208,9 @@ struct ItalicBoldNode : Node {
 };
 
 struct InLineCodeNode : Node {
-    std::string code;
+    std::string value;
 
-    explicit InLineCodeNode(std::string code) : code(std::move(code)) {}
+    explicit InLineCodeNode(std::string code) : value(std::move(code)) {}
     /// @inheritdoc
     void accept(IVisitor &visitor) const override { visitor.visit(*this); }
 };

@@ -7,7 +7,7 @@ A fast, keyboard-driven note-taking TUI application. QuickNotes is built as a lo
 - **Markdown Rendering**: Currently handles headings, bold, italic, inline code, code blocks, block quotes, ordered/unordered lists, tables, and horizontal rules.
 - **SQLite Persistence**: All notes are stored on a local, serverless SQLite database.
 - **Fully keyboard-driven**: All keybindings are configurable.
-- **External Editor integration**: Open any note in $EDITOR and changes will be saved back automatically.
+- **External Editor integration**: Open any note in $EDITOR and changes will be saved back automatically upon exit of the editor.
 - **TOML configuration**: Customize colors and keybindings in `$HOME/.config/QuickNotes/config.toml`.
 
 ---
@@ -88,14 +88,20 @@ italic_fg   = "#74C7EC"
  
 ---
 
-## TODO:
+## TODO (ordered by priority):
 
-- [ ] Parse/render links, arrows, and other markdown features.
-- [ ] Search / filter through notes.
-- [ ] Keybinding configuration
-- [ ] Tree-sitter syntax highlighting for code blocks.
 - [ ] Note renaming.
+- [ ] Keybinding / more robust color configuration
+- [x] Search / filter through notes.
+- [ ] Fuzzy find within content of notes across all notes or within a single note.
+- [ ] Add tags, categories, and favorites.
+- [ ] Note list custom ordering.
+- [ ] Parse/render links, arrows, and other markdown features (maybe not links).
+- [ ] Tree-sitter syntax highlighting for code blocks.
 - [ ] Importing/exporting notes.
+- [ ] Unit tests for configuration loading.
+- [ ] Unit Tests for the Database.
+- [ ] Integration Tests for the States.
 
 ---
 
