@@ -135,9 +135,11 @@ void NoteListState::render() {
     case Mode::NORMAL:
       m_view->setMode("--- NORMAL ---");
       m_view->draw(m_notes, m_selectedIndex);
+      break;
     case Mode::SEARCH:
       m_view->setMode("--- SEARCH ----");
       m_view->draw(m_results, m_selectedIndex, m_query);
+      break;
     default: break;
   }
 }
@@ -198,6 +200,7 @@ void NoteListState::loadNotes() {
     m_notes = m_repository.findAll();
   } catch (const std::runtime_error &e) {
     m_notes = {};
+    setError(e.what());
   }
 }
 

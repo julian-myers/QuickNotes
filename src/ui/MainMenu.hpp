@@ -23,6 +23,9 @@ class MainMenu : public Widget {
     /// @brief Draws menu to window.
     void draw() override;
 
+    void setRecentNotes(std::vector<Model::Note> notes);
+    void setNotesIndex(int index);
+
   private:
     static constexpr const char *LINE_1 = R"(
  _______  __   __  ___   _______  ___   _    

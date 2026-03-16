@@ -12,6 +12,7 @@ namespace QuickNotes::UI {
 
 static constexpr int MARGIN = 2;
 static constexpr int STATUS_H = 1;
+static constexpr int LEFT_SIDE_RATIO_DENOM = 4;
 
 NoteContainer::NoteContainer(
     WINDOW *window, std::shared_ptr<const Config::Config> config
@@ -44,7 +45,7 @@ void NoteContainer::draw(
     Notes &results, int selectedIndex, std::string_view input
 ) {
   clear();
-  m_list->draw(results);
+  m_list->draw(results, selectedIndex);
   if (!results.empty()) {
     m_preview->draw(results[selectedIndex]);
   }
@@ -73,19 +74,19 @@ void NoteContainer::setMode(std::string_view mode) { m_modeLabel = mode; }
 
 Rect NoteContainer::listRect(WINDOW *w) {
   const int h = getmaxy(w);
-  const int listW = getmaxx(w) / 3;
+  const int listW = getmaxx(w) / LEFT_SIDE_RATIO_DENOM;
   return {.yPos = 3, .xPos = 0, .height = h - 3 - STATUS_H, .width = listW};
 }
 
 Rect NoteContainer::previewRect(WINDOW *w) {
   const int h = getmaxy(w);
-  const int listW = getmaxx(w) / 3;
+  const int listW = getmaxx(w) / LEFT_SIDE_RATIO_DENOM;
   const int previewW = getmaxx(w) - listW - (MARGIN * 2);
   return {0, listW + MARGIN, h - 1, previewW};
 }
 
 Rect NoteContainer::searchBarRect(WINDOW *w) {
-  const int listW = getmaxx(w) / 3;
+  const int listW = getmaxx(w) / LEFT_SIDE_RATIO_DENOM;
   return {.yPos = 0, .xPos = 0, .height = 3, .width = listW};
 }
 

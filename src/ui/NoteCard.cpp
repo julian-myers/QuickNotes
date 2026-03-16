@@ -31,8 +31,6 @@ void NoteCard::draw(bool selected) {
       win, 3, 1, "Edited:  %-*s", w - 10, shortDate(m_note.updatedAt).c_str()
   );
 
-  mvwprintw(win, 4, 1, "%-*s", w - 10, "");
-
   if (selected) {
     wattroff(win, COLOR_PAIR(Markdown::Colors::PAIR_CARD_SELECTED));
   }

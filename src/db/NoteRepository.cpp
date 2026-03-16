@@ -96,7 +96,7 @@ std::vector<Model::Note> NotesRepository::findAll() {
 
 std::vector<Model::Note> NotesRepository::findMostRecent(int amount) {
   const std::string query = "SELECT id, title, content, created_at, updated_at "
-                            "FROM notes ORDER BY update_at DESC LIMT ?";
+                            "FROM notes ORDER BY updated_at DESC LIMIT ?";
   auto s = prepare(query);
   sqlite3_bind_int(s.statement, 1, amount);
   return collect(s);

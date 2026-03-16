@@ -12,7 +12,7 @@ class NoteCard : public Widget {
     void draw(bool selected);
     void draw() override;
 
-    static constexpr int HEIGHT = 5;
+    static constexpr int HEIGHT = 4;
 
   private:
     SubWindow m_subWin;

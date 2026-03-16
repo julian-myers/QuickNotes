@@ -4,6 +4,7 @@
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
+#include "models/Notes.hpp"
 #include "ui/MainMenu.hpp"
 #include <memory>
 #include <ncurses.h>
@@ -60,10 +61,13 @@ class MainMenuState : public NoteAwareState {
     enum class MenuOption { NOTES = 0, SETTINGS = 1, EXIT = 2 };
     UI::MainMenu m_menu;
     int m_selectedIndex = 0;
+    std::vector<Model::Note> m_recentNotes;
     static constexpr int NUM_OPTIONS = 5;
     static const std::vector<std::pair<Config::Action, MenuAction>> m_keyMap;
 
     /// @brief Move cursor down.
     void moveDown() override;
+
+    void moveUp() override;
 };
 } // namespace QuickNotes::App::State

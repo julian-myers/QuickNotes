@@ -1,4 +1,5 @@
 #include "PreviewWidget.hpp"
+#include "markdown/Colors.hpp"
 #include "markdown/Lexer.hpp"
 #include "markdown/Parser.hpp"
 #include "markdown/Renderer.hpp"
@@ -18,6 +19,10 @@ PreviewWidget::PreviewWidget(
 void PreviewWidget::draw(const Model::Note &note) {
   clear();
   drawBorder();
+  std::string title = " " + note.title + ":";
+  attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+  print(0, 2, title);
+  attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
   wclear(m_innerWindow.get());
   auto tokens = Markdown::Lexer(note.content).tokenize();
   auto ast = Markdown::Parser(std::move(tokens)).parse();

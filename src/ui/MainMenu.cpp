@@ -50,14 +50,13 @@ std::tuple<int, int, int> MainMenu::drawOptions() {
   std::vector<std::string> options = {notesOption, settingsOption, quitOption};
   int numOptions = options.size();
   int optionRow = m_startRow + TITLE_HEIGHT + 1;
-  int margin = m_winWidth / 4;
-  int range = m_winWidth - (margin * 5);
-  int spacing = range / (numOptions + 1);
+  int margin = m_winWidth / 3;
+  int range = m_winWidth - (margin * 2);
+  int spacing = range / (numOptions - 1);
   wattron(m_window, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_ITALIC);
   for (int i = 0; i < numOptions; i++) {
-    std::string label = options[i];
-    int col = margin + spacing * (i + 1) - (static_cast<int>(label.size()) / 2);
-    mvwprintw(m_window, optionRow, col, "%s", label.c_str());
+    int col = margin + spacing * i - (static_cast<int>(options[i].size()) / 2);
+    mvwprintw(m_window, optionRow, col, "%s", options[i].c_str());
   }
   wattroff(m_window, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_ITALIC);
   return std::make_tuple(optionRow, range, margin);
@@ -70,12 +69,12 @@ void MainMenu::drawRecentNotes(int optionRow, int range, int margin) {
   int subCol = margin;
   std::string heading = "Recent Notes: ";
   wattron(m_window, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
-  mvwprintw(m_window, subRow, subCol, "%s", heading.c_str());
+  mvwprintw(m_window, subRow, subCol - 4, "%s", heading.c_str());
   wattroff(m_window, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
   if (m_notesWindow) {
     delwin(m_notesWindow);
   }
-  m_notesWindow = derwin(m_window, subHeight, range, subRow + 1, subCol);
+  m_notesWindow = derwin(m_window, subHeight, range, subRow + 1, margin);
   wattron(m_notesWindow, COLOR_PAIR(Markdown::Colors::PAIR_TEXT));
   for (int i = 0; i < static_cast<int>(m_recentNotes.size()); i++) {
     if (i == m_notesIndex) {
@@ -90,5 +89,11 @@ void MainMenu::drawRecentNotes(int optionRow, int range, int margin) {
   wrefresh(m_window);
   wrefresh(m_notesWindow);
 }
+
+void MainMenu::setRecentNotes(std::vector<Model::Note> notes) {
+  m_recentNotes = std::move(notes);
+}
+
+void MainMenu::setNotesIndex(int index) { m_notesIndex = index; }
 
 } // namespace QuickNotes::UI
