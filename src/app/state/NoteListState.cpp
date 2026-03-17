@@ -7,6 +7,7 @@
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
 #include "config/Editor.hpp"
+#include "db/INoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ncurses.h"
 #include "ui/NoteContainer.hpp"
@@ -39,35 +40,41 @@ void NoteListState::onExit() {
 }
 
 void NoteListState::render() {
+  const std::string label =
+      m_errorMessage.empty() ? std::string(modeLabel()) : "ERR: " + m_errorMessage;
+
   switch (m_mode) {
     case Mode::NORMAL:
-      m_view->setMode("--- NORMAL ---");
+      m_view->setMode(label);
       m_view->draw(m_notes, m_selectedIndex);
       m_lastStateWasSearch = false;
       break;
     case Mode::SEARCH:
-      m_view->setMode("--- SEARCH ----");
+      m_view->setMode(label);
+      m_view->setSearchTyping(m_searchTyping);
       m_view->draw(m_results, m_selectedIndex, m_query);
       m_lastStateWasSearch = true;
       break;
     case Mode::PREVIEW:
       if (m_lastStateWasSearch) {
-        m_view->setMode("--- SEARCH ----");
+        m_view->setMode(label);
         m_view->draw(m_results, m_selectedIndex, m_query);
         return;
       }
-      m_view->setMode("--- PREVIEW ----");
+      m_view->setMode(label);
       m_view->draw(m_notes, m_selectedIndex);
       break;
   }
 }
 
 std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
+  clearError();
   switch (m_mode) {
-    case Mode::NORMAL: return handleNormal(key);
-    case Mode::SEARCH: return handleSearch(key);
+    case Mode::NORMAL:  return handleNormal(key);
+    case Mode::SEARCH:  return handleSearch(key);
     case Mode::PREVIEW: return handlePreview(key);
   }
+  return nullptr;
 }
 
 // ----- Private Methods -----
@@ -95,6 +102,7 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
         Model::Note &note = m_notes[m_selectedIndex];
         note.content = Config::Editor::openEditor(note.content);
         auto result = m_repository.update(note);
+        if (!result) setError(result.error());
         m_view->resetScroll();
         return nullptr;
       };
@@ -111,33 +119,62 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
 
 std::unique_ptr<AbstractState> NoteListState::handleSearch(int key) {
   const auto &binds = m_config->keyBinds.bindings;
-  if (key == binds.at(Config::Action::ESCAPE)) {
-    exitSearchMode();
-    return nullptr;
-  }
 
-  if (key == binds.at(Config::Action::MOVE_UP)) {
-    moveUp();
-    return nullptr;
-  }
-  if (key == binds.at(Config::Action::MOVE_DOWN)) {
-    moveDown();
-    return nullptr;
-  }
-  if (key == binds.at(Config::Action::SELECT) ||
-      key == binds.at(Config::Action::MOVE_RIGHT)) {
-    if (m_results.empty()) return nullptr;
-    m_mode = Mode::PREVIEW;
-    return nullptr;
-  }
-  if (key == KEY_BACKSPACE && !m_query.empty()) {
-    m_query.pop_back();
-    updateSearch();
-    return nullptr;
-  }
-  if (std::isprint(static_cast<unsigned char>(key))) {
-    m_query += static_cast<char>(key);
-    updateSearch();
+  if (m_searchTyping) {
+    if (key == binds.at(Config::Action::ESCAPE) ||
+        key == binds.at(Config::Action::SEARCH)) {
+      if (!m_query.empty()) {
+        m_query.clear();
+        m_results = m_notes;
+        m_selectedIndex = 0;
+        m_searchTyping = false;
+      } else {
+        exitSearchMode();
+      }
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::SELECT) ||
+        key == binds.at(Config::Action::MOVE_RIGHT)) {
+      m_searchTyping = false;
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::BACKSPACE) || key == KEY_BACKSPACE) {
+      if (!m_query.empty()) {
+        m_query.pop_back();
+        updateSearch();
+      }
+      return nullptr;
+    }
+    if (std::isprint(static_cast<unsigned char>(key))) {
+      m_query += static_cast<char>(key);
+      updateSearch();
+    }
+  } else {
+    // NAVIGATING: j/k move, ESC exits, '/' restarts typing
+    if (key == binds.at(Config::Action::ESCAPE)) {
+      exitSearchMode();
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::SEARCH)) {
+      m_query.clear();
+      m_results = m_notes;
+      m_selectedIndex = 0;
+      m_searchTyping = true;
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::MOVE_UP)) {
+      moveUp();
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::MOVE_DOWN)) {
+      moveDown();
+      return nullptr;
+    }
+    if (key == binds.at(Config::Action::SELECT) ||
+        key == binds.at(Config::Action::MOVE_RIGHT)) {
+      if (!m_results.empty()) m_mode = Mode::PREVIEW;
+      return nullptr;
+    }
   }
   return nullptr;
 }
@@ -168,7 +205,7 @@ void NoteListState::moveDown() {
   const auto &list = activeNotes();
   if (list.empty()) return;
   m_selectedIndex =
-      std::min(static_cast<int>(m_notes.size()) - 1, m_selectedIndex + 1);
+      std::min(static_cast<int>(list.size()) - 1, m_selectedIndex + 1);
   m_view->resetScroll();
 }
 
@@ -177,6 +214,7 @@ void NoteListState::enterSearchMode() {
   m_query.clear();
   m_results = m_notes;
   m_selectedIndex = 0;
+  m_searchTyping = true;
 }
 
 void NoteListState::exitSearchMode() {
@@ -184,6 +222,7 @@ void NoteListState::exitSearchMode() {
   m_query.clear();
   m_results.clear();
   m_selectedIndex = 0;
+  m_searchTyping = false;
 }
 
 void NoteListState::updateSearch() {
@@ -191,12 +230,22 @@ void NoteListState::updateSearch() {
     m_results = m_query.empty() ? m_notes : m_repository.findByTitle(m_query);
   } catch (const std::runtime_error &e) {
     m_results = {};
+    setError(e.what());
   }
   m_selectedIndex = 0;
 }
 
 std::vector<Model::Note> &NoteListState::activeNotes() {
   return m_mode == Mode::NORMAL ? m_notes : m_results;
+}
+
+std::string_view NoteListState::modeLabel() const {
+  switch (m_mode) {
+    case Mode::NORMAL:  return "--- NORMAL ---";
+    case Mode::SEARCH:  return m_searchTyping ? "--- SEARCH ---" : "--- NAVIGATE ---";
+    case Mode::PREVIEW: return "--- PREVIEW ---";
+  }
+  return "--- NORMAL ---";
 }
 
 void NoteListState::loadNotes() {

@@ -6,9 +6,11 @@
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
 #include "ui/MainMenu.hpp"
+#include "utils/Log.hpp"
 #include <algorithm>
 #include <memory>
 #include <ncurses.h>
+#include <stdexcept>
 
 namespace QuickNotes::App::State {
 
@@ -25,7 +27,12 @@ MainMenuState::MainMenuState(
 
 void MainMenuState::onEnter() {
   wclear(m_window);
-  m_recentNotes = m_repository.findMostRecent(5);
+  try {
+    m_recentNotes = m_repository.findMostRecent(5);
+  } catch (const std::runtime_error &e) {
+    QN_LOG_ERROR("MainMenuState: failed to load recent notes: {}", e.what());
+    m_recentNotes = {};
+  }
   m_menu.setRecentNotes(m_recentNotes);
 }
 

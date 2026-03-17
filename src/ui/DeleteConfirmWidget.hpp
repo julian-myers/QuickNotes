@@ -28,15 +28,24 @@ class DeleteConfirmWidget : public DialogBox {
     /// @param title The title of the note about to be deleted.
     void setNoteTitle(std::string_view title);
 
+    /// @brief Display an inline error message if the deletion failed.
+    ///
+    /// When set, OPTIONS changes to "[y] Retry  [n] Cancel". Pass an empty
+    /// string to clear the error and return to the normal prompt.
+    /// @param message The error returned by the repository.
+    void setError(std::string_view message);
+
   private:
     static constexpr std::string_view LABEL = "Delete Note";
     static constexpr std::string_view PROMPT =
         "Are you sure you want to delete this note?";
-    static constexpr std::string_view OPTIONS = "[y] Yes    [n] No";
+    static constexpr std::string_view OPTIONS_NORMAL = "[y] Yes    [n] No";
+    static constexpr std::string_view OPTIONS_RETRY  = "[y] Retry  [n] Cancel";
     static constexpr int DIALOG_HEIGHT = 7;
     static constexpr int DIALOG_WIDTH = 44;
     static constexpr int MARGIN = 2;
     std::string m_noteTitle;
+    std::string m_errorMessage;
 };
 
 } // namespace QuickNotes::UI

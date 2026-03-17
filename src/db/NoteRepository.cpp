@@ -83,8 +83,8 @@ Result NotesRepository::findById(int id) {
   if (sqlite3_step(s.statement) == SQLITE_ROW) {
     return toNote(s.statement);
   }
-  return std::unexpected("Note to id " + std::to_string(id) + " not found");
   QN_LOG_WARN("Note not found id={}", id);
+  return std::unexpected("Note with id " + std::to_string(id) + " not found");
 }
 
 std::vector<Model::Note> NotesRepository::findAll() {

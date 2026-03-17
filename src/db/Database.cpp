@@ -25,10 +25,14 @@ sqlite3 *Database::connection() { return m_db; }
 
 std::filesystem::path Database::dbPath() {
   const char *xdg = std::getenv("XDG_DATA_HOME");
-  std::filesystem::path dataDir =
-      xdg ? std::filesystem::path(xdg) :
-            std::filesystem::path(std::getenv("HOME")) / ".local/share";
-  return dataDir / "QuickNotes" / "notes.db";
+  if (xdg) {
+    return std::filesystem::path(xdg) / "QuickNotes" / "notes.db";
+  }
+  const char *home = std::getenv("HOME");
+  if (!home) {
+    throw std::runtime_error("Neither XDG_DATA_HOME nor HOME is set");
+  }
+  return std::filesystem::path(home) / ".local/share" / "QuickNotes" / "notes.db";
 }
 
 void Database::execute(const std::string &sql) {

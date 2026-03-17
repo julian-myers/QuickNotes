@@ -27,11 +27,20 @@ class NoteListWidget : public Widget {
 
     void draw() override;
 
-    /// @brief draw content to window.
-    /// @param notes list of notes to display.
+    /// @brief Render the list in normal mode.
+    /// @param notes         Notes to display.
+    /// @param selectedIndex Index of the highlighted note.
     void draw(const Notes &notes, int selectedIndex);
 
-    /// @brief draw content to window.
+    /// @brief Render the list in search/navigate mode.
+    ///
+    /// Unselected titles are drawn with the search highlight color.
+    /// @param notes         Filtered notes to display.
+    /// @param selectedIndex Index of the highlighted note.
+    /// @param inSearch      Pass true to apply search title colors.
+    void draw(const Notes &notes, int selectedIndex, bool inSearch);
+
+    /// @brief Render without selection (all cards unselected).
     /// @param notes list of notes to display.
     void draw(const Notes &notes);
 

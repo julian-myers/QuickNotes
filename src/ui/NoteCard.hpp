@@ -25,9 +25,14 @@ class NoteCard : public Widget {
     /// @param note   The note whose summary this card displays.
     explicit NoteCard(WINDOW *parent, Rect rect, Model::Note note);
 
-    /// @brief Renders the card, optionally highlighted as selected.
+    /// @brief Renders the card with optional selection and search highlights.
+    ///
+    /// When @p inSearch is true, unselected titles are drawn in
+    /// PAIR_HEADING_1 (purple) to distinguish them from normal-mode results.
+    ///
     /// @param selected Whether to draw the card with the selection color pair.
-    void draw(bool selected);
+    /// @param inSearch Whether the list is currently in search/navigate mode.
+    void draw(bool selected, bool inSearch = false);
 
     /// @brief Renders the card in its default (unselected) state.
     void draw() override;

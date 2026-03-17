@@ -37,10 +37,7 @@ std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
   auto action =
       dispatchKey(key, m_config->keyBinds, m_keyMap, DeleteConfirmAction::NONE);
   switch (action) {
-    case DeleteConfirmAction::CONFIRM:
-      handleConfirm();
-      m_controller.popState();
-      return nullptr;
+    case DeleteConfirmAction::CONFIRM: handleConfirm(); return nullptr;
     case DeleteConfirmAction::CANCEL: m_controller.popState(); return nullptr;
     case DeleteConfirmAction::NONE: return nullptr;
   }
@@ -48,17 +45,18 @@ std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
 
 void DeleteNoteState::handleConfirm() {
   using expected = std::expected<Model::Note, std::string>;
-  auto result =
-      m_repository.remove(m_note)
-          .and_then([&](Model::Note note) -> expected {
-            m_notes.erase(m_notes.begin() + m_selectedIndex);
-            m_selectedIndex =
-                std::min(m_selectedIndex, static_cast<int>(m_notes.size() - 1));
-            return m_note;
-          })
-          .or_else([&](const std::string &error) -> expected {
-            setError(error);
-            return std::unexpected(error);
-          });
+  m_repository.remove(m_note)
+      .and_then([&](Model::Note note) -> expected {
+        m_notes.erase(m_notes.begin() + m_selectedIndex);
+        m_selectedIndex =
+            std::min(m_selectedIndex, static_cast<int>(m_notes.size() - 1));
+        m_controller.popState();
+        return note;
+      })
+      .or_else([&](const std::string &error) -> expected {
+        setError(error);
+        m_widget->setError(error);
+        return std::unexpected(error);
+      });
 }
 } // namespace QuickNotes::App::State

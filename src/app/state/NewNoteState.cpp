@@ -44,9 +44,13 @@ std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
     case NewNoteAction::CONFIRM: handleConfirm(); return nullptr;
     case NewNoteAction::CANCEL: m_controller.popState(); return nullptr;
     case NewNoteAction::BACKSPACE:
+      m_widget->setError("");
+      clearError();
       if (!m_inputBuffer.empty()) m_inputBuffer.pop_back();
       return nullptr;
     case NewNoteAction::APPEND:
+      m_widget->setError("");
+      clearError();
       if (std::isprint(key)) m_inputBuffer += static_cast<char>(key);
       return nullptr;
     case NewNoteAction::NONE: return nullptr;
@@ -79,16 +83,17 @@ void NewNoteState::handleConfirm() {
     m_controller.popState();
     return;
   }
-  auto result = m_repository.create(m_inputBuffer)
-                    .and_then([&](Model::Note created) -> expected {
-                      m_notes.push_back(created);
-                      return created;
-                    })
-                    .or_else([&](const std::string &error) -> expected {
-                      setError(error);
-                      return std::unexpected(error);
-                    });
-  m_controller.popState();
+  m_repository.create(m_inputBuffer)
+      .and_then([&](Model::Note created) -> expected {
+        m_notes.push_back(created);
+        m_controller.popState();
+        return created;
+      })
+      .or_else([&](const std::string &error) -> expected {
+        setError(error);
+        m_widget->setError(error);
+        return std::unexpected(error);
+      });
 }
 
 } // namespace QuickNotes::App::State

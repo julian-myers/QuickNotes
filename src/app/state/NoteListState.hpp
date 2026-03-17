@@ -81,6 +81,7 @@ class NoteListState : public NoteAwareState {
     std::unique_ptr<UI::NoteContainer> m_view;
     static const std::vector<Binding> m_keyMap;
     bool m_lastStateWasSearch = false;
+    bool m_searchTyping = false;
 
     std::unique_ptr<AbstractState> handleNormal(int key);
     std::unique_ptr<AbstractState> handleSearch(int key);

@@ -13,6 +13,10 @@ void DeleteConfirmWidget::setNoteTitle(std::string_view title) {
   m_noteTitle = title;
 }
 
+void DeleteConfirmWidget::setError(std::string_view message) {
+  m_errorMessage = message;
+}
+
 void DeleteConfirmWidget::draw() {
   drawChrome(LABEL);
   WINDOW *win = m_dialog.get();
@@ -32,14 +36,26 @@ void DeleteConfirmWidget::draw() {
       truncated.c_str()
   );
 
+  if (!m_errorMessage.empty()) {
+    wattron(win, A_BOLD);
+    mvwprintw(
+        win, 4, MARGIN, "%-*.*s",
+        DIALOG_WIDTH - (MARGIN * 2) - 2,
+        DIALOG_WIDTH - (MARGIN * 2) - 2,
+        m_errorMessage.c_str()
+    );
+    wattroff(win, A_BOLD);
+  }
+
+  const auto &options = m_errorMessage.empty() ? OPTIONS_NORMAL : OPTIONS_RETRY;
   wattron(win, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
   mvwprintw(
       win,
       5,
-      (DIALOG_WIDTH - static_cast<int>(OPTIONS.size())) / 2,
+      (DIALOG_WIDTH - static_cast<int>(options.size())) / 2,
       "%.*s",
-      static_cast<int>(OPTIONS.size()),
-      OPTIONS.data()
+      static_cast<int>(options.size()),
+      options.data()
   );
   wattroff(win, COLOR_PAIR(Markdown::Colors::PAIR_ITALIC) | A_ITALIC);
 

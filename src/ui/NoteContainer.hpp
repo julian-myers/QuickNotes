@@ -64,6 +64,14 @@ class NoteContainer : public Widget {
     /// @param mode Display string for the current mode (e.g. "--- NORMAL ---").
     void setMode(std::string_view mode);
 
+    /// @brief Tells the search bar which sub-state is active.
+    ///
+    /// When @p typing is true the search bar shows a '/' prefix indicating the
+    /// user is entering a query. When false it shows '~' indicating the user
+    /// is navigating the filtered results.
+    /// @param typing true when typing a query, false when navigating.
+    void setSearchTyping(bool typing);
+
     /// @brief Scroll the preview panel up by one line.
     void scrollUp();
 
@@ -78,6 +86,7 @@ class NoteContainer : public Widget {
 
     std::string m_modeLabel = "---- NORMAL ----";
     Mode m_mode;
+    bool m_searchTyping = false;
     std::shared_ptr<const Config::Config> m_config;
     std::unique_ptr<NoteListWidget> m_list;
     std::unique_ptr<PreviewWidget> m_preview;

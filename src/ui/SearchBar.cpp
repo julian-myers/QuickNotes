@@ -15,10 +15,9 @@ void SearchBar::setLabel(std::string_view label) { m_label = label; }
 
 void SearchBar::draw() {
   clear();
-  int margin = 1;
   drawBorder();
   attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
-  print(0, 2, "Search: \'/\'");
+  print(0, 2, m_label.empty() ? "/ " : m_label);
   attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
   print(1, 2, m_inputBuffer);
   wnoutrefresh(m_window);

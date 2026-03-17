@@ -49,9 +49,10 @@ void NoteContainer::draw(
     Notes &results, int selectedIndex, std::string_view input
 ) {
   clear();
-  m_list->draw(results, selectedIndex);
+  m_list->draw(results, selectedIndex, true);
   m_statusBar->setLabel(m_modeLabel);
   m_statusBar->draw();
+  m_searchBar->setLabel(m_searchTyping ? "/ " : "~ ");
   m_searchBar->setInputBuffer(input);
   m_searchBar->draw();
   wnoutrefresh(m_window);
@@ -75,6 +76,8 @@ void NoteContainer::resize(WINDOW *window) {
 }
 
 void NoteContainer::setMode(std::string_view mode) { m_modeLabel = mode; }
+
+void NoteContainer::setSearchTyping(bool typing) { m_searchTyping = typing; }
 
 void NoteContainer::scrollUp() {
   m_previewScrollOffset = std::max(0, m_previewScrollOffset - 1);

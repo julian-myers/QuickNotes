@@ -13,6 +13,10 @@ void AddNoteWidget::setInputBuffer(std::string_view buffer) {
   m_inputBuffer = buffer;
 }
 
+void AddNoteWidget::setError(std::string_view message) {
+  m_errorMessage = message;
+}
+
 void AddNoteWidget::draw() {
   drawChrome(LABEL);
   WINDOW *win = m_dialog.get();
@@ -26,6 +30,16 @@ void AddNoteWidget::draw() {
       PROMPT.data(),
       m_inputBuffer.c_str()
   );
+  if (!m_errorMessage.empty()) {
+    wattron(win, A_BOLD);
+    mvwprintw(
+        win, 4, MARGIN, "%-*.*s",
+        DIALOG_WIDTH - (MARGIN * 2) - 2,
+        DIALOG_WIDTH - (MARGIN * 2) - 2,
+        m_errorMessage.c_str()
+    );
+    wattroff(win, A_BOLD);
+  }
   wrefresh(win);
 }
 } // namespace QuickNotes::UI

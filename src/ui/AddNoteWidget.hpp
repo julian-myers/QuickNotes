@@ -30,13 +30,20 @@ class AddNoteWidget : public DialogBox {
     /// @param buffer The current user input for the new note title.
     void setInputBuffer(std::string_view buffer);
 
+    /// @brief Display an inline error message below the prompt.
+    ///
+    /// Pass an empty string to clear the error.
+    /// @param message The error to display (e.g. "Title already exists").
+    void setError(std::string_view message);
+
   private:
     static constexpr std::string_view LABEL = "New Note";
     static constexpr std::string_view PROMPT = "Title: ";
-    static constexpr int DIALOG_HEIGHT = 5;
+    static constexpr int DIALOG_HEIGHT = 6;
     static constexpr int DIALOG_WIDTH = 44;
     static constexpr int MARGIN = 2;
     std::string m_inputBuffer;
+    std::string m_errorMessage;
 };
 
 } // namespace QuickNotes::UI

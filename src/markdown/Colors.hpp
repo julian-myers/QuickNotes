@@ -86,7 +86,7 @@ constexpr int PAIR_TABLE_BODY = 18;
 constexpr int PAIR_TEXT = 19;
 
 constexpr int PAIR_CARD = 20;
-constexpr int PAIR_CARD_SELECTED = 20;
+constexpr int PAIR_CARD_SELECTED = 21;
 
 /// @brief Struct to wrap RGB in a type.
 struct NCursesRGB {
