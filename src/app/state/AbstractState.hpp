@@ -71,10 +71,12 @@ class AbstractState {
     IAppController &m_controller;
     int m_cursorPosition;
 
-    template <typename T>
+    template <typename T, typename... Args>
       requires std::derived_from<T, AbstractState>
-    std::unique_ptr<T> makeState() {
-      return std::make_unique<T>(m_window, m_config, m_controller);
+    std::unique_ptr<T> makeState(Args &&...args) {
+      return std::make_unique<T>(
+          m_window, m_config, m_controller, std::forward<Args>(args)...
+      );
     }
 };
 

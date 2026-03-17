@@ -1,7 +1,7 @@
 #include "ViewingState.hpp"
+#include "StateUtils.hpp"
 #include "app/Controller.hpp"
 #include "config/Editor.hpp"
-#include "db/NoteRepository.hpp"
 #include "models/Notes.hpp"
 #include "ncurses.h"
 #include "ui/NoteViewWidget.hpp"
@@ -60,19 +60,11 @@ const std::vector<std::pair<Config::Action, ViewingState::ViewActions>>
 };
 
 std::unique_ptr<AbstractState> ViewingState::handleInput(int key) {
-  using Action = Config::Action;
-  const auto &binds = m_config->keyBinds.bindings;
-  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
-    return key == binds.at(pair.first);
-  });
-  auto action = (it != m_keyMap.end()) ? it->second : ViewActions::NONE;
+  auto action =
+      dispatchKey(key, m_config->keyBinds, m_keyMap, ViewActions::NONE);
   switch (action) {
-    case ViewActions::SCROLL_UP:
-      moveUp();
-      return nullptr;
-    case ViewActions::SCROLL_DOWN:
-      moveDown();
-      return nullptr;
+    case ViewActions::SCROLL_UP: moveUp(); return nullptr;
+    case ViewActions::SCROLL_DOWN: moveDown(); return nullptr;
     case ViewActions::EDIT:
       {
         m_note.content = Config::Editor::openEditor(m_note.content);
@@ -81,11 +73,8 @@ std::unique_ptr<AbstractState> ViewingState::handleInput(int key) {
         m_widget->draw();
         return nullptr;
       };
-    case ViewActions::BACK:
-      m_controller.popState();
-      return nullptr;
-    case ViewActions::NONE:
-      return nullptr;
+    case ViewActions::BACK: m_controller.popState(); return nullptr;
+    case ViewActions::NONE: return nullptr;
   }
   return nullptr;
 }

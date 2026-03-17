@@ -1,4 +1,5 @@
 #include "DeleteNoteState.hpp"
+#include "StateUtils.hpp"
 #include "app/Controller.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
@@ -33,21 +34,15 @@ const std::vector<DeleteNoteState::Binding> DeleteNoteState::m_keyMap{
 };
 
 std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
-  const auto &binds = m_config->keyBinds.bindings;
-  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
-    return key == binds.at(pair.first);
-  });
-  auto action = (it != m_keyMap.end()) ? it->second : DeleteConfirmAction::NONE;
+  auto action =
+      dispatchKey(key, m_config->keyBinds, m_keyMap, DeleteConfirmAction::NONE);
   switch (action) {
     case DeleteConfirmAction::CONFIRM:
       handleConfirm();
       m_controller.popState();
       return nullptr;
-    case DeleteConfirmAction::CANCEL:
-      m_controller.popState();
-      return nullptr;
-    case DeleteConfirmAction::NONE:
-      return nullptr;
+    case DeleteConfirmAction::CANCEL: m_controller.popState(); return nullptr;
+    case DeleteConfirmAction::NONE: return nullptr;
   }
 }
 

@@ -16,7 +16,7 @@ std::string cellText(const QuickNotes::Markdown::TableCellNode &cell) {
   for (const auto &child : cell.children) {
     if (auto *t =
             dynamic_cast<const QuickNotes::Markdown::TextNode *>(child.get())) {
-      text += t->text;
+      text += t->value;
     }
   }
   return text;
@@ -56,27 +56,13 @@ void Renderer::visit(const HeadingNode &node) {
   prefix += HEADING_SYMBOLS[node.level - 1];
   int pair;
   switch (node.level) {
-    case 1:
-      pair = PAIR_HEADING_1;
-      break;
-    case 2:
-      pair = PAIR_HEADING_2;
-      break;
-    case 3:
-      pair = PAIR_HEADING_3;
-      break;
-    case 4:
-      pair = PAIR_HEADING_4;
-      break;
-    case 5:
-      pair = PAIR_HEADING_5;
-      break;
-    case 6:
-      pair = PAIR_HEADING_6;
-      break;
-    default:
-      pair = PAIR_HEADING_6;
-      break;
+    case 1: pair = PAIR_HEADING_1; break;
+    case 2: pair = PAIR_HEADING_2; break;
+    case 3: pair = PAIR_HEADING_3; break;
+    case 4: pair = PAIR_HEADING_4; break;
+    case 5: pair = PAIR_HEADING_5; break;
+    case 6: pair = PAIR_HEADING_6; break;
+    default: pair = PAIR_HEADING_6; break;
   }
   wattron(m_window, COLOR_PAIR(pair) | A_BOLD);
   wmove(m_window, m_currentRow, m_currentColumn);
@@ -105,7 +91,7 @@ void Renderer::visit(const CodeBlockNode &node) {
   int width = getmaxx(m_window);
   for (const auto &child : node.children) {
     if (auto *text = dynamic_cast<const TextNode *>(child.get())) {
-      code = text->text;
+      code = text->value;
     }
   }
   std::vector<std::string> lines;
@@ -254,30 +240,26 @@ void Renderer::visit(const TableRowNode &node) {
 }
 
 void Renderer::visit(const TableCellNode &node) {
-  int colWidth = m_currentCell < static_cast<int>(m_columnWidths.size())
-                     ? m_columnWidths[m_currentCell]
-                     : 0;
+  int colWidth = m_currentCell < static_cast<int>(m_columnWidths.size()) ?
+                     m_columnWidths[m_currentCell] :
+                     0;
 
   ColumnAlignment alignment =
-      m_currentCell < static_cast<int>(m_columnAlignments.size())
-          ? m_columnAlignments[m_currentCell]
-          : ColumnAlignment::NONE;
+      m_currentCell < static_cast<int>(m_columnAlignments.size()) ?
+          m_columnAlignments[m_currentCell] :
+          ColumnAlignment::NONE;
 
   std::string text = cellText(node);
   int padding = colWidth - static_cast<int>(text.size());
   int leftPad = 1, rightPad = 1;
   switch (alignment) {
-    case ColumnAlignment::RIGHT:
-      leftPad += padding;
-      break;
+    case ColumnAlignment::RIGHT: leftPad += padding; break;
     case ColumnAlignment::CENTER:
       leftPad += padding / 2;
       rightPad += padding - padding / 2;
       break;
     case ColumnAlignment::LEFT:
-    case ColumnAlignment::NONE:
-      rightPad += padding;
-      break;
+    case ColumnAlignment::NONE: rightPad += padding; break;
   }
   int colStart = 1;
   for (int i = 0; i < m_currentCell; i++) {
@@ -319,8 +301,8 @@ void Renderer::visit(const HorizontalRuleNode &node) {
 
 void Renderer::visit(const TextNode &node) {
   wmove(m_window, m_currentRow, m_currentColumn);
-  wprintw(m_window, "%s", node.text.c_str());
-  m_currentColumn += static_cast<int>(node.text.size());
+  wprintw(m_window, "%s", node.value.c_str());
+  m_currentColumn += static_cast<int>(node.value.size());
 }
 
 void Renderer::visit(const BoldNode &node) {
@@ -352,9 +334,9 @@ void Renderer::visit(const ItalicBoldNode &node) {
 void Renderer::visit(const InLineCodeNode &node) {
   wattron(m_window, COLOR_PAIR(PAIR_INLINE_CODE));
   wmove(m_window, m_currentRow, m_currentColumn);
-  wprintw(m_window, "%s", node.code.c_str());
+  wprintw(m_window, "%s", node.value.c_str());
   wattroff(m_window, COLOR_PAIR(PAIR_INLINE_CODE));
-  m_currentColumn += static_cast<int>(node.code.size());
+  m_currentColumn += static_cast<int>(node.value.size());
 }
 
 // --- Private Methods ---

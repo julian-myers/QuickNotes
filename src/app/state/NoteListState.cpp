@@ -1,4 +1,5 @@
 #include "app/state/NoteListState.hpp"
+#include "StateUtils.hpp"
 #include "app/Controller.hpp"
 #include "app/state/AbstractState.hpp"
 #include "app/state/DeleteNoteState.hpp"
@@ -42,22 +43,13 @@ std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
 }
 
 std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
-  const auto &binds = m_config->keyBinds.bindings;
-  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
-    return key == binds.at(pair.first);
-  });
-  auto action = (it != m_keyMap.end()) ? it->second : NormalAction::NONE;
+  const auto action =
+      dispatchKey(key, m_config->keyBinds, m_keyMap, NormalAction::NONE);
   switch (action) {
     case NormalAction::MOVE_UP: moveUp(); return nullptr;
     case NormalAction::MOVE_DOWN: moveDown(); return nullptr;
     case NormalAction::VIEW_NOTE:
-      return std::make_unique<ViewingState>(
-          m_window,
-          m_config,
-          m_controller,
-          m_repository,
-          m_notes[m_selectedIndex]
-      );
+      return makeState<ViewingState>(m_repository, m_notes[m_selectedIndex]);
     case NormalAction::SELECT:
       {
         Model::Note &note = m_notes[m_selectedIndex];
@@ -67,20 +59,9 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
       };
     case NormalAction::SEARCH: enterSearchMode(); return nullptr;
     case NormalAction::NEW_NOTE:
-      {
-        return std::make_unique<NewNoteState>(
-            m_window, m_config, m_controller, m_repository, m_notes
-        );
-      }
+      return makeState<NewNoteState>(m_repository, m_notes);
     case NormalAction::DELETE_NOTE:
-      return std::make_unique<DeleteNoteState>(
-          m_window,
-          m_config,
-          m_controller,
-          m_repository,
-          m_notes,
-          m_selectedIndex
-      );
+      return makeState<DeleteNoteState>(m_repository, m_notes, m_selectedIndex);
     case NormalAction::QUIT: m_controller.quit(); return nullptr;
     case NormalAction::NONE: return nullptr;
   }

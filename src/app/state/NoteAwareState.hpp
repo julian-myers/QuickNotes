@@ -5,7 +5,6 @@
 #include "config/Config.hpp"
 #include "db/INoteRepository.hpp"
 #include "ncurses.h"
-#include <concepts>
 #include <memory>
 
 namespace QuickNotes::App::State {
@@ -21,20 +20,11 @@ class NoteAwareState : public AbstractState {
         : AbstractState(window, config, controller), m_repository(repository) {}
 
   protected:
-    template <typename T>
-      requires std::derived_from<T, NoteAwareState>
-    std::unique_ptr<T> makeNoteAwareState() {
-      return std::make_unique<T>(
-          m_window, m_config, m_controller, m_repository
-      );
-    }
-
-    void setError(const std::string &message) { m_errorMessage = message; }
-
-    void clearError() { m_errorMessage.clear(); }
-
     DB::INotesRepository &m_repository;
     std::string m_errorMessage;
+
+    void setError(const std::string &message) { m_errorMessage = message; }
+    void clearError() { m_errorMessage.clear(); }
 };
 
 } // namespace QuickNotes::App::State

@@ -1,9 +1,10 @@
 #include "MainMenuState.hpp"
+#include "NoteListState.hpp"
+#include "StateUtils.hpp"
+#include "ViewingState.hpp"
 #include "app/Controller.hpp"
 #include "app/state/AbstractState.hpp"
 #include "app/state/NoteAwareState.hpp"
-#include "app/state/NoteListState.hpp"
-#include "app/state/ViewingState.hpp"
 #include "config/Config.hpp"
 #include "ui/MainMenu.hpp"
 #include <algorithm>
@@ -47,24 +48,22 @@ const std::vector<std::pair<Action, MainMenuState::MenuAction>>
     };
 
 std::unique_ptr<AbstractState> MainMenuState::handleInput(int key) {
-  const auto &binds = m_config->keyBinds.bindings;
-  auto it = std::ranges::find_if(m_keyMap, [&](const auto &pair) {
-    return key == binds.at(pair.first);
-  });
-  auto action = (it != m_keyMap.end()) ? it->second : MenuAction::NONE;
+  auto action =
+      dispatchKey(key, m_config->keyBinds, m_keyMap, MenuAction::NONE);
   switch (action) {
     case MenuAction::MOVE_UP: moveUp(); return nullptr;
     case MenuAction::MOVE_DOWN: moveDown(); return nullptr;
     case MenuAction::SELECT:
-      if (m_recentNotes.empty()) return nullptr;
-      return std::make_unique<ViewingState>(
-          m_window,
-          m_config,
-          m_controller,
-          m_repository,
-          m_recentNotes[m_selectedIndex]
-      );
-    case MenuAction::NOTES_SELECTED: return makeNoteAwareState<NoteListState>();
+      {
+        if (m_recentNotes.empty()) {
+          return nullptr;
+        }
+        return makeState<ViewingState>(
+            m_repository, m_recentNotes[m_selectedIndex]
+        );
+      }
+    case MenuAction::NOTES_SELECTED:
+      return makeState<NoteListState>(m_repository);
     case MenuAction::SETTINGS_SELECTED: return nullptr;
     case MenuAction::QUIT_SELECTED: m_controller.quit(); return nullptr;
     case MenuAction::NONE: return nullptr;
