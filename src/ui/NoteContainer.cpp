@@ -14,11 +14,15 @@ static constexpr int MARGIN = 2;
 static constexpr int STATUS_H = 1;
 static constexpr int LEFT_SIDE_RATIO_DENOM = 4;
 
-NoteContainer::NoteContainer(
-    WINDOW *window, std::shared_ptr<const Config::Config> config
-)
-    : Widget(window), m_config(config), m_list(nullptr), m_preview(nullptr),
-      m_searchBar(nullptr), m_statusBar(nullptr),
+using ConfigPtr = std::shared_ptr<const Config::Config>;
+
+NoteContainer::NoteContainer(WINDOW *window, ConfigPtr config)
+    : Widget(window),
+      m_config(config),
+      m_list(nullptr),
+      m_preview(nullptr),
+      m_searchBar(nullptr),
+      m_statusBar(nullptr),
       m_listWindow(window, listRect(window)),
       m_previewWindow(window, previewRect(window)),
       m_statusWindow(window, statusBarRect(window)),
@@ -32,13 +36,13 @@ NoteContainer::NoteContainer(
 void NoteContainer::draw(Notes &notes, int selectedIndex) {
   clear();
   m_list->draw(notes, selectedIndex);
-  if (!notes.empty()) {
-    m_preview->draw(notes[selectedIndex]);
-  }
   m_statusBar->setLabel(m_modeLabel);
   m_statusBar->draw();
   m_searchBar->draw();
   wnoutrefresh(m_window);
+  if (!notes.empty()) {
+    refreshPreview(notes[selectedIndex]);
+  }
 }
 
 void NoteContainer::draw(
@@ -46,14 +50,14 @@ void NoteContainer::draw(
 ) {
   clear();
   m_list->draw(results, selectedIndex);
-  if (!results.empty()) {
-    m_preview->draw(results[selectedIndex]);
-  }
   m_statusBar->setLabel(m_modeLabel);
   m_statusBar->draw();
   m_searchBar->setInputBuffer(input);
   m_searchBar->draw();
   wnoutrefresh(m_window);
+  if (!results.empty()) {
+    refreshPreview(results[selectedIndex]);
+  }
 }
 
 void NoteContainer::draw() {
@@ -71,6 +75,19 @@ void NoteContainer::resize(WINDOW *window) {
 }
 
 void NoteContainer::setMode(std::string_view mode) { m_modeLabel = mode; }
+
+void NoteContainer::scrollUp() {
+  m_previewScrollOffset = std::max(0, m_previewScrollOffset - 1);
+}
+
+void NoteContainer::scrollDown() {
+  m_previewScrollOffset = std::min(
+      PreviewWidget::PAD_HEIGHT - previewRect(m_window).height,
+      m_previewScrollOffset + 1
+  );
+}
+
+void NoteContainer::resetScroll() { m_previewScrollOffset = 0; }
 
 Rect NoteContainer::listRect(WINDOW *w) {
   const int h = getmaxy(w);
@@ -94,6 +111,18 @@ Rect NoteContainer::statusBarRect(WINDOW *w) {
   const int width = getmaxx(w);
   const int height = getmaxy(w);
   return {.yPos = height - 1, .xPos = 0, .height = 1, .width = width};
+}
+
+void NoteContainer::refreshPreview(const Model::Note &note) {
+  m_preview->draw(note);
+  Rect r = previewRect(m_window);
+  m_preview->padRefresh(
+      m_previewScrollOffset,
+      r.yPos + 1,
+      r.xPos + 1,
+      r.yPos + r.height - 2,
+      r.xPos + r.width - 2
+  );
 }
 
 } // namespace QuickNotes::UI

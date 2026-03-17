@@ -5,7 +5,6 @@
 #include "app/state/DeleteNoteState.hpp"
 #include "app/state/NewNoteState.hpp"
 #include "app/state/NoteAwareState.hpp"
-#include "app/state/ViewingState.hpp"
 #include "config/Config.hpp"
 #include "config/Editor.hpp"
 #include "models/Notes.hpp"
@@ -25,7 +24,8 @@ NoteListState::NoteListState(
     DB::INotesRepository &repository
 ) noexcept
     : NoteAwareState(window, config, controller, repository),
-      m_selectedIndex(0), m_view(nullptr) {}
+      m_selectedIndex(0),
+      m_view(nullptr) {}
 
 void NoteListState::onEnter() {
   wclear(m_window);
@@ -38,9 +38,50 @@ void NoteListState::onExit() {
   wclear(m_window);
 }
 
-std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
-  return m_mode == Mode::NORMAL ? handleNormal(key) : handleSearch(key);
+void NoteListState::render() {
+  switch (m_mode) {
+    case Mode::NORMAL:
+      m_view->setMode("--- NORMAL ---");
+      m_view->draw(m_notes, m_selectedIndex);
+      m_lastStateWasSearch = false;
+      break;
+    case Mode::SEARCH:
+      m_view->setMode("--- SEARCH ----");
+      m_view->draw(m_results, m_selectedIndex, m_query);
+      m_lastStateWasSearch = true;
+      break;
+    case Mode::PREVIEW:
+      if (m_lastStateWasSearch) {
+        m_view->setMode("--- SEARCH ----");
+        m_view->draw(m_results, m_selectedIndex, m_query);
+        return;
+      }
+      m_view->setMode("--- PREVIEW ----");
+      m_view->draw(m_notes, m_selectedIndex);
+      break;
+  }
 }
+
+std::unique_ptr<AbstractState> NoteListState::handleInput(int key) {
+  switch (m_mode) {
+    case Mode::NORMAL: return handleNormal(key);
+    case Mode::SEARCH: return handleSearch(key);
+    case Mode::PREVIEW: return handlePreview(key);
+  }
+}
+
+// ----- Private Methods -----
+
+const std::vector<NoteListState::Binding> NoteListState::m_keyMap{
+    {Config::Action::MOVE_UP, NormalAction::MOVE_UP},
+    {Config::Action::MOVE_DOWN, NormalAction::MOVE_DOWN},
+    {Config::Action::MOVE_RIGHT, NormalAction::FOCUS_PREVIEW},
+    {Config::Action::SELECT, NormalAction::EDIT_NOTE},
+    {Config::Action::SEARCH, NormalAction::SEARCH},
+    {Config::Action::NEW_NOTE, NormalAction::NEW_NOTE},
+    {Config::Action::DELETE_NOTE, NormalAction::DELETE_NOTE},
+    {Config::Action::QUIT, NormalAction::QUIT},
+};
 
 std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
   const auto action =
@@ -48,13 +89,13 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
   switch (action) {
     case NormalAction::MOVE_UP: moveUp(); return nullptr;
     case NormalAction::MOVE_DOWN: moveDown(); return nullptr;
-    case NormalAction::VIEW_NOTE:
-      return makeState<ViewingState>(m_repository, m_notes[m_selectedIndex]);
-    case NormalAction::SELECT:
+    case NormalAction::FOCUS_PREVIEW: m_mode = Mode::PREVIEW; return nullptr;
+    case NormalAction::EDIT_NOTE:
       {
         Model::Note &note = m_notes[m_selectedIndex];
         note.content = Config::Editor::openEditor(note.content);
         auto result = m_repository.update(note);
+        m_view->resetScroll();
         return nullptr;
       };
     case NormalAction::SEARCH: enterSearchMode(); return nullptr;
@@ -70,7 +111,6 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
 
 std::unique_ptr<AbstractState> NoteListState::handleSearch(int key) {
   const auto &binds = m_config->keyBinds.bindings;
-
   if (key == binds.at(Config::Action::ESCAPE)) {
     exitSearchMode();
     return nullptr;
@@ -84,62 +124,44 @@ std::unique_ptr<AbstractState> NoteListState::handleSearch(int key) {
     moveDown();
     return nullptr;
   }
-
   if (key == binds.at(Config::Action::SELECT) ||
       key == binds.at(Config::Action::MOVE_RIGHT)) {
     if (m_results.empty()) return nullptr;
-    return std::make_unique<ViewingState>(
-        m_window,
-        m_config,
-        m_controller,
-        m_repository,
-        m_results[m_selectedIndex]
-    );
+    m_mode = Mode::PREVIEW;
+    return nullptr;
   }
-
   if (key == KEY_BACKSPACE && !m_query.empty()) {
     m_query.pop_back();
     updateSearch();
     return nullptr;
   }
-
   if (std::isprint(static_cast<unsigned char>(key))) {
     m_query += static_cast<char>(key);
     updateSearch();
   }
-
   return nullptr;
 }
 
-void NoteListState::render() {
-  switch (m_mode) {
-    case Mode::NORMAL:
-      m_view->setMode("--- NORMAL ---");
-      m_view->draw(m_notes, m_selectedIndex);
-      break;
-    case Mode::SEARCH:
-      m_view->setMode("--- SEARCH ----");
-      m_view->draw(m_results, m_selectedIndex, m_query);
-      break;
-    default: break;
+std::unique_ptr<AbstractState> NoteListState::handlePreview(int key) {
+  const auto &binds = m_config->keyBinds.bindings;
+  if (key == binds.at(Config::Action::MOVE_UP)) {
+    m_view->scrollUp();
+    return nullptr;
   }
+  if (key == binds.at(Config::Action::MOVE_DOWN)) {
+    m_view->scrollDown();
+    return nullptr;
+  }
+  if (key == binds.at(Config::Action::MOVE_LEFT)) {
+    m_mode = Mode::NORMAL;
+    return nullptr;
+  }
+  return nullptr;
 }
-
-// ----- Private Methods -----
-
-const std::vector<NoteListState::Binding> NoteListState::m_keyMap{
-    {Config::Action::MOVE_UP, NormalAction::MOVE_UP},
-    {Config::Action::MOVE_DOWN, NormalAction::MOVE_DOWN},
-    {Config::Action::MOVE_RIGHT, NormalAction::VIEW_NOTE},
-    {Config::Action::SELECT, NormalAction::SELECT},
-    {Config::Action::SEARCH, NormalAction::SEARCH},
-    {Config::Action::NEW_NOTE, NormalAction::NEW_NOTE},
-    {Config::Action::DELETE_NOTE, NormalAction::DELETE_NOTE},
-    {Config::Action::QUIT, NormalAction::QUIT},
-};
 
 void NoteListState::moveUp() {
   m_selectedIndex = std::max(0, m_selectedIndex - 1);
+  m_view->resetScroll();
 }
 
 void NoteListState::moveDown() {
@@ -147,6 +169,7 @@ void NoteListState::moveDown() {
   if (list.empty()) return;
   m_selectedIndex =
       std::min(static_cast<int>(m_notes.size()) - 1, m_selectedIndex + 1);
+  m_view->resetScroll();
 }
 
 void NoteListState::enterSearchMode() {

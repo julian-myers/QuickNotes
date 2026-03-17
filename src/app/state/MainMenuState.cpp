@@ -1,7 +1,6 @@
 #include "MainMenuState.hpp"
 #include "NoteListState.hpp"
 #include "StateUtils.hpp"
-#include "ViewingState.hpp"
 #include "app/Controller.hpp"
 #include "app/state/AbstractState.hpp"
 #include "app/state/NoteAwareState.hpp"
@@ -21,7 +20,8 @@ MainMenuState::MainMenuState(
     IAppController &controller,
     DB::INotesRepository &repository
 ) noexcept
-    : NoteAwareState(window, config, controller, repository), m_menu(window) {}
+    : NoteAwareState(window, config, controller, repository),
+      m_menu(window) {}
 
 void MainMenuState::onEnter() {
   wclear(m_window);
@@ -58,9 +58,7 @@ std::unique_ptr<AbstractState> MainMenuState::handleInput(int key) {
         if (m_recentNotes.empty()) {
           return nullptr;
         }
-        return makeState<ViewingState>(
-            m_repository, m_recentNotes[m_selectedIndex]
-        );
+        return makeState<NoteListState>(m_repository);
       }
     case MenuAction::NOTES_SELECTED:
       return makeState<NoteListState>(m_repository);

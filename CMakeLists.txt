@@ -52,7 +52,6 @@ set(APP_SOURCES
 	src/app/state/MainMenuState.cpp
 	src/app/state/NoteListState.cpp
 	src/app/state/NewNoteState.cpp
-	src/app/state/ViewingState.cpp
 	src/app/state/DeleteNoteState.cpp
 )
 
@@ -61,7 +60,6 @@ set(UI_SOURCES
 	src/ui/NoteListWidget.cpp
 	src/ui/PreviewWidget.cpp
 	src/ui/AddNoteWidget.cpp
-	src/ui/NoteViewWidget.cpp
 	src/ui/DeleteConfirmWidget.cpp
 	src/ui/DialogBox.cpp
 	src/ui/StatusBar.cpp

@@ -28,9 +28,12 @@ class NoteContainer : public Widget {
     void draw() override;
     void resize(WINDOW *window) override;
     void setMode(std::string_view mode);
+    void scrollUp();
+    void scrollDown();
+    void resetScroll();
 
   private:
-    enum class Mode { NORMAL, SEARCH, EDIT };
+    enum class Mode { NORMAL, SEARCH, PREVIEW };
 
     std::string m_modeLabel = "---- NORMAL ----";
     Mode m_mode;
@@ -39,6 +42,8 @@ class NoteContainer : public Widget {
     std::unique_ptr<PreviewWidget> m_preview;
     std::unique_ptr<StatusBar> m_statusBar;
     std::unique_ptr<SearchBar> m_searchBar;
+    int m_previewScrollOffset = 0;
+
     SubWindow m_listWindow;
     SubWindow m_previewWindow;
     SubWindow m_statusWindow;
@@ -48,6 +53,8 @@ class NoteContainer : public Widget {
     static Rect previewRect(WINDOW *window);
     static Rect searchBarRect(WINDOW *window);
     static Rect statusBarRect(WINDOW *window);
+
+    void refreshPreview(const Model::Note &note);
 };
 
 } // namespace QuickNotes::UI
