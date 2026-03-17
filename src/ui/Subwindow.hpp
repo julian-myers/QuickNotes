@@ -6,10 +6,24 @@
 
 namespace QuickNotes::UI {
 
+/// @brief Axis-aligned rectangle used to position a SubWindow within its parent.
 struct Rect {
-    int yPos, xPos, height, width;
+    int yPos;   ///< Row offset from the top of the parent window.
+    int xPos;   ///< Column offset from the left of the parent window.
+    int height; ///< Height in terminal rows.
+    int width;  ///< Width in terminal columns.
 };
 
+/// @brief RAII wrapper around an ncurses derived window (derwin).
+///
+/// Creates a child window via derwin() at construction and calls delwin()
+/// at destruction. Move-only: copying is disabled because ncurses windows
+/// cannot be shared between owners.
+///
+/// If derwin() fails (e.g. the requested geometry extends outside the parent),
+/// the constructor prints a diagnostic and calls std::abort().
+///
+/// @see Widget
 class SubWindow {
   public:
     SubWindow(WINDOW *parent, Rect rect)

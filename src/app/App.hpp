@@ -11,9 +11,11 @@
 namespace QuickNotes::App {
 using namespace QuickNotes::App::State;
 
-/// @brief Contains the main loop and wires all the processes together.
+/// @brief Entry point and owner of all top-level application resources.
 ///
-/// Has members m_state and m_config.
+/// Initializes ncurses and the logger, loads configuration, opens the database,
+/// and runs the main event loop. The loop drives the state machine by calling
+/// render() and handleInput() on the top of m_stateStack each frame.
 ///
 /// @see AbstractState
 /// @see Config::Config

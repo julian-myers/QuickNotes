@@ -60,6 +60,10 @@ class AbstractState {
   protected:
     using ConfigPtr = std::shared_ptr<const Config::Config>;
 
+    /// @brief Constructs the common state base.
+    /// @param window     Pointer to the ncurses WINDOW this state renders into.
+    /// @param config     Shared pointer to the application configuration.
+    /// @param controller Reference to the application controller.
     explicit AbstractState(
         WINDOW *window, ConfigPtr config, IAppController &controller
     )
@@ -69,8 +73,19 @@ class AbstractState {
     WINDOW *m_window;
     std::shared_ptr<const Config::Config> m_config;
     IAppController &m_controller;
-    int m_cursorPosition;
+    int m_cursorPosition; ///< Logical cursor row within this state's list or menu.
 
+    /// @brief Factory helper that constructs a derived state with the shared
+    /// base dependencies pre-filled.
+    ///
+    /// Forwards m_window, m_config, and m_controller followed by any
+    /// additional @p args to T's constructor. Use this instead of
+    /// std::make_unique inside handleInput() to avoid repeating the boilerplate.
+    ///
+    /// @tparam T    A class derived from AbstractState.
+    /// @tparam Args Additional constructor argument types.
+    /// @param  args Additional arguments forwarded after the base dependencies.
+    /// @return A unique_ptr<T> to the newly constructed state.
     template <typename T, typename... Args>
       requires std::derived_from<T, AbstractState>
     std::unique_ptr<T> makeState(Args &&...args) {

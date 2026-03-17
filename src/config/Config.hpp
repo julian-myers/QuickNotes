@@ -5,6 +5,17 @@
 
 namespace QuickNotes::Config {
 
+/// @brief Color settings for every markdown and UI element.
+///
+/// Each field holds a hex color string (e.g. "#CBA6F7"). Default values are
+/// the Catppuccin Mocha palette. Fields are grouped by the element they style:
+/// headings, emphasis, code, block elements, lists, tables, and base text.
+///
+/// Loaded from the TOML config file by ConfigLoader; falls back to these
+/// defaults if the file is absent or a key is missing.
+///
+/// @see Config
+/// @see ConfigLoader
 struct ColorConfig {
     // headings
     std::string heading1fg = "#CBA6F7";
@@ -57,6 +68,13 @@ struct ColorConfig {
     std::string crust = "#11111b";
 };
 
+/// @brief Semantic actions that can be bound to keys in KeyBindsConfig.
+///
+/// States map raw ncurses key codes to Action values via KeyBindsConfig::bindings
+/// so that all key-handling logic operates on named actions rather than
+/// hard-coded key codes. This makes the keybinds fully remappable.
+///
+/// @see KeyBindsConfig
 enum class Action {
   // navigation
   MOVE_UP,
@@ -89,6 +107,13 @@ enum class Action {
   BACKSPACE,
 };
 
+/// @brief Maps each semantic Action to its ncurses key code.
+///
+/// Default bindings follow a Vim-style layout (hjkl navigation, q to quit,
+/// etc.). ConfigLoader overwrites individual entries when the user's TOML
+/// config specifies custom bindings.
+///
+/// @see Action
 struct KeyBindsConfig {
     std::unordered_map<Action, int> bindings = {
         {Action::MOVE_UP, 'k'},
@@ -113,6 +138,15 @@ struct KeyBindsConfig {
     };
 };
 
+/// @brief Top-level configuration object passed throughout the application.
+///
+/// Aggregates ColorConfig and KeyBindsConfig. Constructed by ConfigLoader::load()
+/// and shared as a std::shared_ptr<const Config> so that all components see
+/// the same immutable snapshot for the lifetime of the application.
+///
+/// @see ColorConfig
+/// @see KeyBindsConfig
+/// @see ConfigLoader
 struct Config {
     ColorConfig colors;
     KeyBindsConfig keyBinds;

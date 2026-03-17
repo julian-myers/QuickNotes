@@ -32,17 +32,23 @@ class MainMenuState : public NoteAwareState {
         DB::INotesRepository &repository
     ) noexcept;
 
-    /// @brief Maps key/user input to semantic action to which informs widget
-    /// which action to execute/respond to.
-    /// @param key The key pressed/input.
-    /// @return A unique pointer that points to the next state to transition to.
+    /// @brief Translate a raw key into a MenuAction and act on it.
+    ///
+    /// Navigation keys update the selected index; the SELECT key triggers the
+    /// highlighted option; letter shortcuts jump directly to Notes, Settings,
+    /// or Quit.
+    ///
+    /// @param key The raw ncurses key code.
+    /// @return A unique pointer to the next state, or nullptr to stay in this state.
     std::unique_ptr<AbstractState> handleInput(int key) override;
 
-    /// @brief Render the menu.
+    /// @brief Render the main menu and recent-notes list.
     void render() override;
 
+    /// @brief Load the most-recent notes and initialize the menu widget.
     void onEnter() override;
 
+    /// @brief Clear the screen in preparation for the next state.
     void onExit() override;
 
     std::string name() const override { return "MainMenuState"; }
@@ -65,9 +71,10 @@ class MainMenuState : public NoteAwareState {
     static constexpr int NUM_OPTIONS = 5;
     static const std::vector<std::pair<Config::Action, MenuAction>> m_keyMap;
 
-    /// @brief Move cursor down.
+    /// @brief Move the selection cursor down, clamped to the number of options.
     void moveDown() override;
 
+    /// @brief Move the selection cursor up, clamped to zero.
     void moveUp() override;
 };
 } // namespace QuickNotes::App::State

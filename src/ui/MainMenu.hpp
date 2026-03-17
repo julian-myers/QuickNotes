@@ -23,7 +23,12 @@ class MainMenu : public Widget {
     /// @brief Draws menu to window.
     void draw() override;
 
+    /// @brief Provide the list of recently edited notes to display.
+    /// @param notes Notes ordered by most-recently-updated first.
     void setRecentNotes(std::vector<Model::Note> notes);
+
+    /// @brief Set the currently highlighted index within the recent-notes list.
+    /// @param index Zero-based index into the recent notes list.
     void setNotesIndex(int index);
 
   private:

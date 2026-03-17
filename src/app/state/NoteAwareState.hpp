@@ -9,6 +9,14 @@
 
 namespace QuickNotes::App::State {
 
+/// @brief Intermediate base for states that need access to the notes repository.
+///
+/// Extends AbstractState with a reference to INotesRepository and a simple
+/// error-message slot. States that create, delete, or query notes should
+/// inherit from this class instead of AbstractState directly.
+///
+/// @see AbstractState
+/// @see DB::INotesRepository
 class NoteAwareState : public AbstractState {
   public:
     NoteAwareState(
@@ -21,9 +29,15 @@ class NoteAwareState : public AbstractState {
 
   protected:
     DB::INotesRepository &m_repository;
+
+    /// @brief Human-readable error set when a repository operation fails.
     std::string m_errorMessage;
 
+    /// @brief Store an error message to be surfaced in the next render pass.
+    /// @param message The error string returned by the repository.
     void setError(const std::string &message) { m_errorMessage = message; }
+
+    /// @brief Clear any previously stored error message.
     void clearError() { m_errorMessage.clear(); }
 };
 

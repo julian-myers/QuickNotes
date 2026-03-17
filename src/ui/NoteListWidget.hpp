@@ -7,6 +7,16 @@
 
 namespace QuickNotes::UI {
 
+/// @brief Scrollable list of NoteCard widgets for the note browser.
+///
+/// Rebuilds its internal card vector only when the set of note IDs changes,
+/// avoiding unnecessary SubWindow reallocations on every frame. The currently
+/// selected card is highlighted by passing the selected index to the
+/// NoteCard::draw(bool) overload.
+///
+/// @see NoteCard
+/// @see NoteContainer
+/// @see Widget
 class NoteListWidget : public Widget {
     using Notes = std::vector<Model::Note>;
 

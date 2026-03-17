@@ -12,6 +12,20 @@
 
 namespace QuickNotes::App::State {
 
+/// @brief Displays the full note list and handles browsing, searching, and
+/// previewing.
+///
+/// Manages three sub-modes:
+/// - NORMAL: navigate the note list with cursor movement, open or delete notes.
+/// - SEARCH: filter notes in real time as the user types a query.
+/// - PREVIEW: scroll through the rendered markdown preview of the selected note.
+///
+/// Owns a NoteContainer widget that composites the list panel, preview panel,
+/// search bar, and status bar. Input is routed to one of handleNormal(),
+/// handleSearch(), or handlePreview() depending on the current mode.
+///
+/// @see NoteAwareState
+/// @see UI::NoteContainer
 class NoteListState : public NoteAwareState {
     using ConfigPtr = std::shared_ptr<const Config::Config>;
 

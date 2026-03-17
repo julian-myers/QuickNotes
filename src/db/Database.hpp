@@ -5,14 +5,30 @@
 
 namespace QuickNotes::DB {
 
+/// @brief RAII wrapper around a SQLite database connection.
+///
+/// Opens (or creates) the SQLite database at dbPath() on construction and
+/// applies the notes, tags, and note_tags schemas via execute(). The raw
+/// connection pointer is exposed through connection() for use by
+/// NotesRepository, which borrows it without taking ownership.
+///
+/// Only one Database instance should exist for the lifetime of the
+/// application. NotesRepository must not outlive the Database that
+/// provided its connection.
+///
+/// @see NotesRepository
 class Database {
   public:
-    /// @brief Constructs a Database.
+    /// @brief Opens the SQLite database and initializes the schema.
     Database();
-    /// @brief Deconstructs a Database.
+
+    /// @brief Closes the SQLite database connection.
     ~Database();
 
-    /// @brief return a pointer to the database.
+    /// @brief Returns the raw SQLite connection pointer.
+    ///
+    /// The pointer is owned by this Database instance. Callers must not
+    /// call sqlite3_close() on it.
     sqlite3 *connection();
 
   private:
@@ -44,11 +60,17 @@ class Database {
 
     sqlite3 *m_db;
 
-    /// @brief Set location of database.
+    /// @brief Returns the platform-appropriate path for the database file.
+    ///
+    /// Typically resolves to ~/.local/share/quicknotes/notes.db on Linux.
     static std::filesystem::path dbPath();
 
-    /// @brief Create the notes database if it doesn't already exist.
-    /// @param sql Schema for the db.
+    /// @brief Execute a SQL statement against the open database connection.
+    ///
+    /// Used during construction to apply schema migrations. Throws
+    /// std::runtime_error if SQLite reports an error.
+    ///
+    /// @param sql The SQL statement to execute.
     void execute(const std::string &sql);
 };
 
