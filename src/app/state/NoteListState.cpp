@@ -4,6 +4,7 @@
 #include "app/state/AbstractState.hpp"
 #include "app/state/DeleteNoteState.hpp"
 #include "app/state/NewNoteState.hpp"
+#include "app/state/RenameNoteState.hpp"
 #include "app/state/NoteAwareState.hpp"
 #include "config/Config.hpp"
 #include "config/Editor.hpp"
@@ -87,6 +88,7 @@ const std::vector<NoteListState::Binding> NoteListState::m_keyMap{
     {Config::Action::SEARCH, NormalAction::SEARCH},
     {Config::Action::NEW_NOTE, NormalAction::NEW_NOTE},
     {Config::Action::DELETE_NOTE, NormalAction::DELETE_NOTE},
+    {Config::Action::RENAME_NOTE, NormalAction::RENAME_NOTE},
     {Config::Action::QUIT, NormalAction::QUIT},
 };
 
@@ -111,6 +113,8 @@ std::unique_ptr<AbstractState> NoteListState::handleNormal(int key) {
       return makeState<NewNoteState>(m_repository, m_notes);
     case NormalAction::DELETE_NOTE:
       return makeState<DeleteNoteState>(m_repository, m_notes, m_selectedIndex);
+    case NormalAction::RENAME_NOTE:
+      return makeState<RenameNoteState>(m_repository, m_notes, m_selectedIndex);
     case NormalAction::QUIT: m_controller.quit(); return nullptr;
     case NormalAction::NONE: return nullptr;
   }

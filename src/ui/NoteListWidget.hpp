@@ -50,7 +50,7 @@ class NoteListWidget : public Widget {
 
   private:
     std::vector<NoteCard> m_cards;
-    std::vector<int> m_cachedIds;
+    std::vector<std::pair<int, std::string>> m_cachedKeys;
     static constexpr int HEADER_HEIGHT = 3;
 
     bool notesChanged(const Notes &notes) const;

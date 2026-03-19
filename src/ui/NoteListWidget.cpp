@@ -19,14 +19,14 @@ void NoteListWidget::draw(
 void NoteListWidget::draw(
     const std::vector<Model::Note> &notes, int selectedIndex, bool inSearch
 ) {
-  std::vector<int> ids;
-  ids.reserve(notes.size());
+  std::vector<std::pair<int, std::string>> keys;
+  keys.reserve(notes.size());
   for (const auto &note : notes) {
-    ids.push_back(note.id);
+    keys.emplace_back(note.id, note.title);
   }
-  if (ids != m_cachedIds) {
+  if (keys != m_cachedKeys) {
     rebuildCards(notes);
-    m_cachedIds = std::move(ids);
+    m_cachedKeys = std::move(keys);
   }
 
   clear();

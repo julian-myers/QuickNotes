@@ -35,6 +35,7 @@ set(APP_SOURCES
 	src/app/state/NoteListState.cpp
 	src/app/state/NewNoteState.cpp
 	src/app/state/DeleteNoteState.cpp
+	src/app/state/RenameNoteState.cpp
 )
 
 set(UI_SOURCES
@@ -42,6 +43,7 @@ set(UI_SOURCES
 	src/ui/NoteListWidget.cpp
 	src/ui/PreviewWidget.cpp
 	src/ui/AddNoteWidget.cpp
+	src/ui/RenameNoteWidget.cpp
 	src/ui/DeleteConfirmWidget.cpp
 	src/ui/DialogBox.cpp
 	src/ui/StatusBar.cpp

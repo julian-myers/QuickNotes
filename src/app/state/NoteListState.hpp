@@ -67,6 +67,7 @@ class NoteListState : public NoteAwareState {
       EDIT_NOTE,
       NEW_NOTE,
       DELETE_NOTE,
+      RENAME_NOTE,
       QUIT,
       NONE,
     };
