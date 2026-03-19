@@ -103,3 +103,7 @@ add_custom_target(check
 	DEPENDS LexerTests ParserTests
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+
+# ---------------------------- install -------------------------------
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
