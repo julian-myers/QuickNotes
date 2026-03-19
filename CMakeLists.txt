@@ -9,27 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Output binaries to build/
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include(FetchContent)
-FetchContent_Declare(
-	tomlplusplus
-	GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-	GIT_TAG v3.4.0
-)
-FetchContent_MakeAvailable(tomlplusplus)
-
-FetchContent_Declare(
-	googletest
-	URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-)
-FetchContent_MakeAvailable(googletest)
-
-FetchContent_Declare(
-	spdlog
-	GIT_REPOSITORY https://github.com/gabime/spdlog.git
-	GIT_TAG v1.15.1
-)
-FetchContent_MakeAvailable(spdlog)
-
+find_package(tomlplusplus REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(GTest REQUIRED)
 find_package(Curses REQUIRED)
 find_library(NCURSESW_LIBRARY NAMES ncursesw REQUIRED)
 
