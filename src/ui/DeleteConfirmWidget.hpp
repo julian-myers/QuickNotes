@@ -37,14 +37,13 @@ class DeleteConfirmWidget : public DialogBox {
 
   private:
     static constexpr std::string_view LABEL = "Delete Note";
-    static constexpr std::string_view PROMPT =
-        "Are you sure you want to delete this note?";
     static constexpr std::string_view OPTIONS_NORMAL = "[y] Yes    [n] No";
-    static constexpr std::string_view OPTIONS_RETRY  = "[y] Retry  [n] Cancel";
+    static constexpr std::string_view OPTIONS_RETRY = "[y] Retry  [n] Cancel";
     static constexpr int DIALOG_HEIGHT = 7;
     static constexpr int DIALOG_WIDTH = 44;
     static constexpr int MARGIN = 2;
     std::string m_noteTitle;
+    std::string PROMPT = "Delete";
     std::string m_errorMessage;
 };
 

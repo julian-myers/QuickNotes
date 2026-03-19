@@ -30,7 +30,7 @@ void DeleteConfirmWidget::draw() {
       win,
       3,
       MARGIN,
-      "%.*s \"%s\"",
+      "%.*s \"%s\" ?",
       static_cast<int>(PROMPT.size()),
       PROMPT.data(),
       truncated.c_str()
@@ -39,7 +39,10 @@ void DeleteConfirmWidget::draw() {
   if (!m_errorMessage.empty()) {
     wattron(win, A_BOLD);
     mvwprintw(
-        win, 4, MARGIN, "%-*.*s",
+        win,
+        4,
+        MARGIN,
+        "%-*.*s",
         DIALOG_WIDTH - (MARGIN * 2) - 2,
         DIALOG_WIDTH - (MARGIN * 2) - 2,
         m_errorMessage.c_str()

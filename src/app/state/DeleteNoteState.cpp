@@ -19,11 +19,14 @@ DeleteNoteState::DeleteNoteState(
     std::vector<Model::Note> &notes,
     int selectedIndex
 )
-    : NoteAwareState(window, config, controller, repository), m_notes(notes),
-      m_note(m_notes[selectedIndex]), m_selectedIndex(selectedIndex) {}
+    : NoteAwareState(window, config, controller, repository),
+      m_notes(notes),
+      m_note(m_notes[selectedIndex]),
+      m_selectedIndex(selectedIndex) {}
 
 void DeleteNoteState::onEnter() {
   m_widget = std::make_unique<UI::DeleteConfirmWidget>(m_window);
+  m_widget->setNoteTitle(m_note.title);
 }
 void DeleteNoteState::onExit() {}
 void DeleteNoteState::render() { m_widget->draw(); }
@@ -45,18 +48,19 @@ std::unique_ptr<AbstractState> DeleteNoteState::handleInput(int key) {
 
 void DeleteNoteState::handleConfirm() {
   using expected = std::expected<Model::Note, std::string>;
-  m_repository.remove(m_note)
-      .and_then([&](Model::Note note) -> expected {
-        m_notes.erase(m_notes.begin() + m_selectedIndex);
-        m_selectedIndex =
-            std::min(m_selectedIndex, static_cast<int>(m_notes.size() - 1));
-        m_controller.popState();
-        return note;
-      })
-      .or_else([&](const std::string &error) -> expected {
-        setError(error);
-        m_widget->setError(error);
-        return std::unexpected(error);
-      });
+  expected result =
+      m_repository.remove(m_note)
+          .and_then([&](Model::Note note) -> expected {
+            m_notes.erase(m_notes.begin() + m_selectedIndex);
+            m_selectedIndex =
+                std::min(m_selectedIndex, static_cast<int>(m_notes.size() - 1));
+            m_controller.popState();
+            return note;
+          })
+          .or_else([&](const std::string &error) -> expected {
+            setError(error);
+            m_widget->setError(error);
+            return std::unexpected(error);
+          });
 }
 } // namespace QuickNotes::App::State

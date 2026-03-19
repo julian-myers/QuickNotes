@@ -20,7 +20,8 @@ NewNoteState::NewNoteState(
     INotesRepository &repository,
     std::vector<Model::Note> &notes
 ) noexcept
-    : NoteAwareState(window, config, controller, repository), m_notes(notes) {}
+    : NoteAwareState(window, config, controller, repository),
+      m_notes(notes) {}
 
 void NewNoteState::onEnter() {
   m_inputBuffer.clear();
@@ -46,7 +47,9 @@ std::unique_ptr<AbstractState> NewNoteState::handleInput(int key) {
     case NewNoteAction::BACKSPACE:
       m_widget->setError("");
       clearError();
-      if (!m_inputBuffer.empty()) m_inputBuffer.pop_back();
+      if (!m_inputBuffer.empty()) {
+        m_inputBuffer.pop_back();
+      }
       return nullptr;
     case NewNoteAction::APPEND:
       m_widget->setError("");
@@ -67,7 +70,9 @@ NewNoteState::NewNoteAction NewNoteState::toAction(int key) const {
   const std::vector<std::pair<Predicate, NewNoteAction>> dispatch = {
       {[&] { return key == binds.at(Action::ESCAPE); }, NewNoteAction::CANCEL},
       {[&] { return key == binds.at(Action::SELECT); }, NewNoteAction::CONFIRM},
-      {[&] { return key == binds.at(Action::BACKSPACE); },
+      {[&] {
+         return key == binds.at(Action::BACKSPACE) || key == KEY_BACKSPACE;
+       },
        NewNoteAction::BACKSPACE},
       {[&] { return std::isprint(key) != 0; }, NewNoteAction::APPEND},
   };
@@ -83,17 +88,17 @@ void NewNoteState::handleConfirm() {
     m_controller.popState();
     return;
   }
-  m_repository.create(m_inputBuffer)
-      .and_then([&](Model::Note created) -> expected {
-        m_notes.push_back(created);
-        m_controller.popState();
-        return created;
-      })
-      .or_else([&](const std::string &error) -> expected {
-        setError(error);
-        m_widget->setError(error);
-        return std::unexpected(error);
-      });
+  expected result = m_repository.create(m_inputBuffer)
+                        .and_then([&](Model::Note created) -> expected {
+                          m_notes.push_back(created);
+                          m_controller.popState();
+                          return created;
+                        })
+                        .or_else([&](const std::string &error) -> expected {
+                          setError(error);
+                          m_widget->setError(error);
+                          return std::unexpected(error);
+                        });
 }
 
 } // namespace QuickNotes::App::State
