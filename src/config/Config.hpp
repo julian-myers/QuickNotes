@@ -34,8 +34,8 @@ struct ColorConfig {
     // code
     std::string inLineCodefg = "#A6ADC8";
     std::string inLineCodebg = "#181825";
-    std::string codeBlockfg = "#181825";
-    std::string codeBlockbg = "#11111B";
+    std::string codeBlockfg = "#CDD6F4";
+    std::string codeBlockbg = "#181825";
 
     // block elements
     std::string horizontalRulefg = "#9399B2";

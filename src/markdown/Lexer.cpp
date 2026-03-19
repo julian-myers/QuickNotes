@@ -24,7 +24,10 @@ namespace QuickNotes::Markdown {
 
 // Constructor
 Lexer::Lexer(std::string source)
-    : m_source(std::move(source)), m_position(0), m_line(1), m_column(1),
+    : m_source(std::move(source)),
+      m_position(0),
+      m_line(1),
+      m_column(1),
       m_state(LexerState::DEFAULT) {}
 
 // -- Private Methods -- //
@@ -134,6 +137,7 @@ void Lexer::handleTableState(TokenListRef tokens) {
   using Handler = std::function<void()>;
   using Rule = std::pair<Predicate, Handler>;
 
+  // TODO: clean this mess up !
   const std::array<Rule, 4> rules = {
       {{[](char c) { return c == NULL_CHAR; },
         [&]() { m_state = LexerState::DEFAULT; }},

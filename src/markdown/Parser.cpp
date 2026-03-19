@@ -30,7 +30,8 @@ namespace QuickNotes::Markdown {
 // Constructor
 ///
 Parser::Parser(std::vector<Token> tokens)
-    : m_tokens(std::move(tokens)), m_pos(0),
+    : m_tokens(std::move(tokens)),
+      m_pos(0),
       m_rules({
           {TokenType::HEADING_1, [this] { return parseHeading(); }},
           {TokenType::HEADING_2, [this] { return parseHeading(); }},
@@ -156,8 +157,10 @@ std::unique_ptr<ListNode> Parser::parseList() {
   auto node = std::make_unique<ListNode>(kind);
   node->items.push_back(parseListItem(first));
   auto isListItem = [&] {
-    return !isAtEnd() && (peek().type == TokenType::LIST_BULLET ||
-                          peek().type == TokenType::LIST_ORDERED);
+    if (isAtEnd()) return false;
+    TokenType t = peek().type;
+    return (kind == ListKind::UNORDERED && t == TokenType::LIST_BULLET) ||
+           (kind == ListKind::ORDERED && t == TokenType::LIST_ORDERED);
   };
   while (isListItem()) {
     Token &token = advance();
