@@ -2,6 +2,8 @@
 
 A fast, keyboard-driven note-taking TUI application. QuickNotes is built as a low-friction alternative to graphical editors like Obsidian. The application is completely contained inside the terminal, notes are stored in an SQLite database, and Markdown renders inline with syntax highlighting powered by a custom markdown parsing/rendering pipeline.
 
+![main_screenshot](./imgs/main_example.png)
+
 ## Features
 
 - **Markdown Rendering**: Currently handles headings, bold, italic, inline code, code blocks, block quotes, ordered/unordered lists, tables, and horizontal rules.
