@@ -98,9 +98,15 @@ gtest_discover_tests(LexerTests)
 gtest_discover_tests(ParserTests)
 add_subdirectory(tests)
 
+add_custom_target(run
+	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}
+	DEPENDS ${PROJECT_NAME}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 add_custom_target(check
 	COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-	DEPENDS LexerTests ParserTests
+	DEPENDS LexerTests ParserTests RepositoryTests
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
