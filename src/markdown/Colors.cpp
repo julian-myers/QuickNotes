@@ -56,6 +56,10 @@ void initColorPairs(const Config::Config &config) {
   defineColor(COLOR_CARD_BG, config.colors.surface2);
   defineColor(COLOR_CARD_SELECTED_FG, config.colors.textBackground);
   defineColor(COLOR_CARD_SELECTED_BG, config.colors.boldItalicfg);
+  defineColor(COLOR_TAG_FG, config.colors.tagfg);
+  defineColor(COLOR_TAG_BG, config.colors.tagbg);
+  defineColor(COLOR_CARD_VISUAL_FG, config.colors.cardVisualfg);
+  defineColor(COLOR_CARD_VISUAL_BG, config.colors.cardVisualbg);
 
   init_pair(PAIR_HEADING_1, COLOR_HEADING_1, COLOR_HEADING_BG);
   init_pair(PAIR_HEADING_2, COLOR_HEADING_2, COLOR_HEADING_BG);
@@ -82,5 +86,8 @@ void initColorPairs(const Config::Config &config) {
   init_pair(PAIR_TEXT, COLOR_TEXT_FG, COLOR_TEXT_BG);
   init_pair(PAIR_CARD, COLOR_CARD_FG, COLOR_CARD_BG);
   init_pair(PAIR_CARD_SELECTED, COLOR_CARD_SELECTED_FG, COLOR_CARD_SELECTED_BG);
+  init_pair(PAIR_TAG, COLOR_TAG_FG, COLOR_TAG_BG);
+  init_pair(PAIR_CARD_VISUAL, COLOR_CARD_VISUAL_FG, COLOR_CARD_VISUAL_BG);
+  init_pair(PAIR_VISUAL_ACCENT, COLOR_CARD_VISUAL_BG, COLOR_TEXT_BG); // orange fg on default bg
 }
 } // namespace QuickNotes::Markdown::Colors

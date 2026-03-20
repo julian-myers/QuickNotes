@@ -53,6 +53,12 @@ class NoteContainer : public Widget {
     /// @param input         The current search query string.
     void draw(Notes &notes, int selectedIndex, std::string_view input);
 
+    /// @brief Render with a visual selection range highlighted.
+    /// @param notes         Notes to display.
+    /// @param selectedIndex The current cursor position.
+    /// @param visualStart   The index where visual mode was entered.
+    void draw(Notes &notes, int selectedIndex, int visualStart);
+
     /// @brief Render with no notes (clears all child panels).
     void draw() override;
 
@@ -80,6 +86,10 @@ class NoteContainer : public Widget {
 
     /// @brief Reset the preview scroll position to the top.
     void resetScroll();
+
+    /// @brief Switches the list border and status bar to the visual-mode accent
+    /// color when true.
+    void setVisual(bool visual);
 
   private:
     enum class Mode { NORMAL, SEARCH, PREVIEW };

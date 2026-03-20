@@ -78,6 +78,16 @@ class INotesRepository {
     /// partial.
     /// @return a vector<Model::Note> of potential matches.
     virtual std::vector<Model::Note> findByTitle(const std::string &query) = 0;
+
+    virtual void setPinned(int noteId, bool pinned) = 0;
+
+    virtual void addTag(int noteId, const std::string &name) = 0;
+
+    virtual void removeTag(int noteId, const std::string &name) = 0;
+
+    virtual std::vector<std::string> getAllTags() = 0;
+
+    virtual std::vector<Model::Note> findByTag(const std::string &tag) = 0;
 };
 
 } // namespace QuickNotes::DB

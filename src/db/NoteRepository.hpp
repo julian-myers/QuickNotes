@@ -5,6 +5,7 @@
 #include "models/Notes.hpp"
 #include <sqlite3.h>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace QuickNotes::DB {
@@ -92,7 +93,31 @@ class NotesRepository : public INotesRepository {
     /// @return a vector<Model::Note> of potential matches.
     std::vector<Model::Note> findByTitle(const std::string &query) override;
 
+    void setPinned(int noteId, bool pinned) override;
+
+    void addTag(int noteId, const std::string &name) override;
+
+    void removeTag(int noteId, const std::string &name) override;
+
+    std::vector<std::string> getAllTags() override;
+
+    std::vector<Model::Note> findByTag(const std::string &tag) override;
+
   private:
+    static constexpr int ID_COLUMN_NUM = 0;
+    static constexpr int TITLE_COLUMN_NUM = 1;
+    static constexpr int CONTENT_COLUMN_NUM = 2;
+    static constexpr int CREATED_COLUMN_NUM = 3;
+    static constexpr int UPDATE_COLUMN_NUM = 4;
+    static constexpr int PINNED_COLUMN_NUM = 5;
+    static constexpr int TAGGED_COLUMN_NUM = 6;
+    static constexpr std::string_view BASE_SELECT =
+        "SELECT n.id, n.title, n.content, n.created_at, n.updated_at, n.pinned, "
+        "GROUP_CONCAT(t.name, ',') AS tags "
+        "FROM notes n "
+        "LEFT JOIN note_tags nt ON n.id = nt.note_id "
+        "LEFT JOIN tags t ON nt.tag_id = t.id ";
+
     /// @brief RAII wrapper for sqlite3_stmt.
     ///
     /// Deconstructor calls sqlite3_finalize.
@@ -124,6 +149,8 @@ class NotesRepository : public INotesRepository {
     /// @return Instance of Statement which provides an RAII wrapper for the
     /// sqlite3_stmt.
     Statement prepare(const std::string &query);
+
+    static std::vector<std::string> splitTags(const char *raw);
 
     sqlite3 *m_db;
 };

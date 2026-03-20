@@ -66,13 +66,22 @@ struct ColorConfig {
     std::string base = "#1e1e2e";
     std::string mantle = "#181825";
     std::string crust = "#11111b";
+
+    // tags
+    std::string tagfg = "#A6E3A1";
+    std::string tagbg = "#313244";
+
+    // visual selection
+    std::string cardVisualfg = "#11111b";
+    std::string cardVisualbg = "#FAB387";
 };
 
 /// @brief Semantic actions that can be bound to keys in KeyBindsConfig.
 ///
-/// States map raw ncurses key codes to Action values via KeyBindsConfig::bindings
-/// so that all key-handling logic operates on named actions rather than
-/// hard-coded key codes. This makes the keybinds fully remappable.
+/// States map raw ncurses key codes to Action values via
+/// KeyBindsConfig::bindings so that all key-handling logic operates on named
+/// actions rather than hard-coded key codes. This makes the keybinds fully
+/// remappable.
 ///
 /// @see KeyBindsConfig
 enum class Action {
@@ -97,6 +106,9 @@ enum class Action {
   DELETE_NOTE,
   OPEN_NOTE,
   RENAME_NOTE,
+  PIN_NOTE,
+  TAG_NOTE,
+  VISUAL_MODE,
 
   // app
   QUIT,
@@ -128,6 +140,9 @@ struct KeyBindsConfig {
         {Action::DELETE_NOTE, 'd'},
         {Action::SELECT, '\n'},
         {Action::RENAME_NOTE, 'r'},
+        {Action::PIN_NOTE, 'p'},
+        {Action::TAG_NOTE, 't'},
+        {Action::VISUAL_MODE, 'v'},
         {Action::QUIT, 'q'},
         {Action::SAVE, 's'},
         {Action::SEARCH, '/'},
@@ -140,9 +155,10 @@ struct KeyBindsConfig {
 
 /// @brief Top-level configuration object passed throughout the application.
 ///
-/// Aggregates ColorConfig and KeyBindsConfig. Constructed by ConfigLoader::load()
-/// and shared as a std::shared_ptr<const Config> so that all components see
-/// the same immutable snapshot for the lifetime of the application.
+/// Aggregates ColorConfig and KeyBindsConfig. Constructed by
+/// ConfigLoader::load() and shared as a std::shared_ptr<const Config> so that
+/// all components see the same immutable snapshot for the lifetime of the
+/// application.
 ///
 /// @see ColorConfig
 /// @see KeyBindsConfig

@@ -44,13 +44,28 @@ class NoteListWidget : public Widget {
     /// @param notes list of notes to display.
     void draw(const Notes &notes);
 
+    /// @brief Render with a visual selection range highlighted.
+    ///
+    /// Cards within [min(selectedIndex, visualStart), max(selectedIndex,
+    /// visualStart)] are highlighted. The cursor card (selectedIndex) uses the
+    /// selected color; the rest of the range uses the search highlight color.
+    ///
+    /// @param notes         Notes to display.
+    /// @param selectedIndex The current cursor position.
+    /// @param visualStart   The index where visual mode was entered.
+    void draw(const Notes &notes, int selectedIndex, int visualStart);
+
     /// @brief Get the selected index.
     /// @return the index of the note list that gets selected.
     int selectedIndex();
 
+    /// @brief Switches the list border to the visual-mode accent color when true.
+    void setVisual(bool visual);
+
   private:
+    bool m_visual = false;
     std::vector<NoteCard> m_cards;
-    std::vector<std::pair<int, std::string>> m_cachedKeys;
+    std::vector<std::pair<int, std::string>> m_cachedKeys; // key: (id, title|pinned|tags…)
     static constexpr int HEADER_HEIGHT = 3;
 
     bool notesChanged(const Notes &notes) const;

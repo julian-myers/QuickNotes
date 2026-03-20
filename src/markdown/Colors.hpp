@@ -51,6 +51,12 @@ constexpr int COLOR_CARD_BG = 40;
 constexpr int COLOR_CARD_SELECTED_FG = 41;
 constexpr int COLOR_CARD_SELECTED_BG = 42;
 
+constexpr int COLOR_TAG_FG = 43;
+constexpr int COLOR_TAG_BG = 44;
+
+constexpr int COLOR_CARD_VISUAL_FG = 45;
+constexpr int COLOR_CARD_VISUAL_BG = 46;
+
 // ---- Pairs ----
 // headings
 constexpr int PAIR_HEADING_1 = 1;
@@ -87,6 +93,11 @@ constexpr int PAIR_TEXT = 19;
 
 constexpr int PAIR_CARD = 20;
 constexpr int PAIR_CARD_SELECTED = 21;
+
+constexpr int PAIR_TAG = 22;
+
+constexpr int PAIR_CARD_VISUAL = 23;  // orange bg — for card title highlight
+constexpr int PAIR_VISUAL_ACCENT = 24; // orange fg — for border and status bar
 
 /// @brief Struct to wrap RGB in a type.
 struct NCursesRGB {

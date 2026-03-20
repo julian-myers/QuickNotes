@@ -27,9 +27,13 @@ class StatusBar : public Widget {
     /// @param buffer Current user input, empty in NORMAL mode.
     void setInputBuffer(std::string_view buffer);
 
+    /// @brief Switches the status bar to visual-mode accent color when true.
+    void setVisual(bool visual);
+
   private:
     std::string m_label;
     std::string m_inputBuffer;
+    bool m_visual = false;
 };
 
 } // namespace QuickNotes::UI

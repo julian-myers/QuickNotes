@@ -61,6 +61,18 @@ void NoteContainer::draw(
   }
 }
 
+void NoteContainer::draw(Notes &notes, int selectedIndex, int visualStart) {
+  clear();
+  m_list->draw(notes, selectedIndex, visualStart);
+  m_statusBar->setLabel(m_modeLabel);
+  m_statusBar->draw();
+  m_searchBar->draw();
+  wnoutrefresh(m_window);
+  if (!notes.empty()) {
+    refreshPreview(notes[selectedIndex]);
+  }
+}
+
 void NoteContainer::draw() {
   // no-op: meaningful draw requires data from state
 }
@@ -76,6 +88,11 @@ void NoteContainer::resize(WINDOW *window) {
 }
 
 void NoteContainer::setMode(std::string_view mode) { m_modeLabel = mode; }
+
+void NoteContainer::setVisual(bool visual) {
+  m_list->setVisual(visual);
+  m_statusBar->setVisual(visual);
+}
 
 void NoteContainer::setSearchTyping(bool typing) { m_searchTyping = typing; }
 

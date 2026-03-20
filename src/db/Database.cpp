@@ -17,6 +17,8 @@ Database::Database() : m_db(nullptr) {
   }
   QN_LOG_DEBUG("Database opened successfully");
   execute(NOTES_SCHEMA);
+  execute(TAGS_SCHEMA);
+  execute(NOTE_TAGS_SCHEMA);
 }
 
 Database::~Database() { sqlite3_close(m_db); }

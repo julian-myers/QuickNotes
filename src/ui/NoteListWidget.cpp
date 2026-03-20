@@ -4,9 +4,16 @@
 #include "ncurses.h"
 #include "ui/NoteCard.hpp"
 #include "ui/Widget.hpp"
+#include <algorithm>
 #include <vector>
 
 namespace QuickNotes::UI {
+
+static std::string noteKey(const Model::Note &note) {
+  std::string k = note.title + (note.pinned ? "|1" : "|0");
+  for (const auto &t : note.tags) { k += '|'; k += t; }
+  return k;
+}
 
 NoteListWidget::NoteListWidget(WINDOW *window) : Widget(window) {}
 
@@ -22,7 +29,7 @@ void NoteListWidget::draw(
   std::vector<std::pair<int, std::string>> keys;
   keys.reserve(notes.size());
   for (const auto &note : notes) {
-    keys.emplace_back(note.id, note.title);
+    keys.emplace_back(note.id, noteKey(note));
   }
   if (keys != m_cachedKeys) {
     rebuildCards(notes);
@@ -30,7 +37,11 @@ void NoteListWidget::draw(
   }
 
   clear();
-  drawBorder();
+  if (m_visual) {
+    drawBorder(COLOR_PAIR(Markdown::Colors::PAIR_VISUAL_ACCENT));
+  } else {
+    drawBorder();
+  }
   attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
   print(0, 2, inSearch ? " Results:" : " Notes:");
   attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
@@ -48,7 +59,46 @@ void NoteListWidget::draw(const std::vector<Model::Note> &notes) {
   draw(notes, -1, false);
 }
 
+void NoteListWidget::draw(
+    const Notes &notes, int selectedIndex, int visualStart
+) {
+  std::vector<std::pair<int, std::string>> keys;
+  keys.reserve(notes.size());
+  for (const auto &note : notes) {
+    keys.emplace_back(note.id, noteKey(note));
+  }
+  if (keys != m_cachedKeys) {
+    rebuildCards(notes);
+    m_cachedKeys = std::move(keys);
+  }
+
+  clear();
+  if (m_visual) {
+    drawBorder(COLOR_PAIR(Markdown::Colors::PAIR_VISUAL_ACCENT));
+  } else {
+    drawBorder();
+  }
+  attrOn(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+  print(0, 2, " Notes:");
+  attrOff(COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD | A_ITALIC);
+
+  const int lo = std::min(selectedIndex, visualStart);
+  const int hi = std::max(selectedIndex, visualStart);
+
+  for (int i = 0; i < static_cast<int>(m_cards.size()); i++) {
+    int y = HEADER_HEIGHT + i * NoteCard::HEIGHT;
+    if (y + NoteCard::HEIGHT > height() - 1) break;
+    const bool isCursor  = (i == selectedIndex);
+    const bool inRange   = (i >= lo && i <= hi && !isCursor);
+    m_cards[i].draw(isCursor, false, inRange);
+  }
+
+  wnoutrefresh(m_window);
+}
+
 void NoteListWidget::draw() {}
+
+void NoteListWidget::setVisual(bool visual) { m_visual = visual; }
 
 void NoteListWidget::rebuildCards(const Notes &notes) {
   m_cards.clear();

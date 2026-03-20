@@ -54,6 +54,12 @@ class Widget {
 
     void drawBorder() { roundedBox(m_window); }
 
+    void drawBorder(attr_t attrs) {
+      wattron(m_window, attrs);
+      roundedBox(m_window);
+      wattroff(m_window, attrs);
+    }
+
     void drawHRule(int row) {
       mvwhline(m_window, row, 0, ACS_HLINE, getmaxx(m_window));
     }

@@ -12,14 +12,20 @@ void StatusBar::setInputBuffer(std::string_view buffer) {
   m_inputBuffer = buffer;
 }
 
+void StatusBar::setVisual(bool visual) { m_visual = visual; }
+
 void StatusBar::draw() {
   int row = getmaxy(m_window) - 1;
   int width = getmaxx(m_window);
 
-  wattron(m_window, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD);
+  const attr_t pair = m_visual
+      ? COLOR_PAIR(Markdown::Colors::PAIR_VISUAL_ACCENT)
+      : COLOR_PAIR(Markdown::Colors::PAIR_BOLD);
+
+  wattron(m_window, pair | A_BOLD);
   mvwprintw(m_window, row, 0, "%-*s", width, ""); // clear the row
   mvwprintw(m_window, row, 0, "%s", m_label.c_str());
-  wattroff(m_window, COLOR_PAIR(Markdown::Colors::PAIR_BOLD) | A_BOLD);
+  wattroff(m_window, pair | A_BOLD);
 
   if (!m_inputBuffer.empty()) {
     mvwprintw(

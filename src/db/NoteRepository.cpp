@@ -10,7 +10,8 @@ namespace QuickNotes::DB {
 using Result = std::expected<Model::Note, std::string>;
 
 // Constructor.
-NotesRepository::NotesRepository(Database &db) : m_db(db.connection()) {}
+NotesRepository::NotesRepository(Database &db)
+    : m_db(db.connection()) {}
 
 Result NotesRepository::create(const std::string &title) {
   QN_LOG_DEBUG("Creating note title=\"{}\"", title);
@@ -53,7 +54,7 @@ Result NotesRepository::update(const Model::Note &note) {
     return std::unexpected(sqlite3_errmsg(m_db));
   }
   QN_LOG_DEBUG("Updated note id={}", note.id);
-  return note;
+  return findById(note.id);
 }
 
 Result NotesRepository::remove(const Model::Note note) {
@@ -76,8 +77,8 @@ Result NotesRepository::remove(const Model::Note note) {
 
 Result NotesRepository::findById(int id) {
   QN_LOG_DEBUG("findById id={}", id);
-  const std::string query = "SELECT id, title, content, created_at, updated_at "
-                            "FROM notes WHERE id = ?";
+  const std::string query =
+      std::string(BASE_SELECT) + "WHERE n.id = ? GROUP BY n.id";
   auto s = prepare(query);
   sqlite3_bind_int(s.statement, 1, id);
   if (sqlite3_step(s.statement) == SQLITE_ROW) {
@@ -88,15 +89,14 @@ Result NotesRepository::findById(int id) {
 }
 
 std::vector<Model::Note> NotesRepository::findAll() {
-  const std::string query =
-      "SELECT id, title, content, created_at, updated_at FROM notes";
+  const std::string query = std::string(BASE_SELECT) + "GROUP BY n.id";
   auto s = prepare(query);
   return collect(s);
 }
 
 std::vector<Model::Note> NotesRepository::findMostRecent(int amount) {
-  const std::string query = "SELECT id, title, content, created_at, updated_at "
-                            "FROM notes ORDER BY updated_at DESC LIMIT ?";
+  const std::string query = std::string(BASE_SELECT) +
+                            "GROUP BY n.id ORDER BY n.updated_at DESC LIMIT ?";
   auto s = prepare(query);
   sqlite3_bind_int(s.statement, 1, amount);
   return collect(s);
@@ -105,10 +105,7 @@ std::vector<Model::Note> NotesRepository::findMostRecent(int amount) {
 std::vector<Model::Note>
 NotesRepository::findByTitle(const std::string &query) {
   const std::string sqlQuery =
-      "SELECT id, title, content, created_at, updated_at "
-      "FROM notes "
-      "WHERE title "
-      "LIKE ?";
+      std::string(BASE_SELECT) + "WHERE n.title LIKE ? GROUP BY n.id";
   const std::string pattern = "%" + query + "%";
   auto s = prepare(sqlQuery);
   sqlite3_bind_text(s.statement, 1, pattern.c_str(), -1, SQLITE_TRANSIENT);
@@ -119,11 +116,25 @@ NotesRepository::findByTitle(const std::string &query) {
 
 Model::Note NotesRepository::toNote(sqlite3_stmt *statement) {
   return Model::Note{
-      sqlite3_column_int(statement, 0),
-      reinterpret_cast<const char *>(sqlite3_column_text(statement, 1)),
-      reinterpret_cast<const char *>(sqlite3_column_text(statement, 2)),
-      reinterpret_cast<const char *>(sqlite3_column_text(statement, 3)),
-      reinterpret_cast<const char *>(sqlite3_column_text(statement, 4)),
+      .id = sqlite3_column_int(statement, ID_COLUMN_NUM),
+      .pinned = sqlite3_column_int(statement, PINNED_COLUMN_NUM) != 0,
+      .title = reinterpret_cast<const char *>(
+          sqlite3_column_text(statement, TITLE_COLUMN_NUM)
+      ),
+      .content = reinterpret_cast<const char *>(
+          sqlite3_column_text(statement, CONTENT_COLUMN_NUM)
+      ),
+      .createdAt = reinterpret_cast<const char *>(
+          sqlite3_column_text(statement, CREATED_COLUMN_NUM)
+      ),
+      .updatedAt = reinterpret_cast<const char *>(
+          sqlite3_column_text(statement, UPDATE_COLUMN_NUM)
+      ),
+      .tags = splitTags(
+          reinterpret_cast<const char *>(
+              sqlite3_column_text(statement, TAGGED_COLUMN_NUM)
+          )
+      )
   };
 }
 
@@ -148,6 +159,92 @@ NotesRepository::Statement NotesRepository::prepare(const std::string &query) {
   return statement;
 }
 
-// std::vector<Model::Note> findMostRecent(int amount) {}
+std::vector<std::string> NotesRepository::splitTags(const char *raw) {
+  if (!raw) return {};
+  std::vector<std::string> tags;
+  std::string s(raw);
+  std::string::size_type start = 0, end;
+  while ((end = s.find(',', start)) != std::string::npos) {
+    tags.push_back(s.substr(start, end - start));
+    start = end + 1;
+  }
+  tags.push_back(s.substr(start));
+  return tags;
+}
+
+void NotesRepository::setPinned(int noteId, bool pinned) {
+  QN_LOG_DEBUG("setPinned id={} pinned={}", noteId, pinned);
+  const std::string query = "UPDATE notes SET pinned = ? WHERE id = ?";
+  auto s = prepare(query);
+  sqlite3_bind_int(s.statement, 1, pinned ? 1 : 0);
+  sqlite3_bind_int(s.statement, 2, noteId);
+  if (sqlite3_step(s.statement) != SQLITE_DONE) {
+    QN_LOG_WARN(
+        "Failed to set pinned id={}: {}", noteId, sqlite3_errmsg(m_db)
+    );
+  }
+}
+
+void NotesRepository::addTag(int noteId, const std::string &name) {
+  QN_LOG_DEBUG("addTag id={} name=\"{}\"", noteId, name);
+  // Create tag if it doesn't exist yet.
+  const std::string insertTag = "INSERT OR IGNORE INTO tags (name) VALUES (?)";
+  auto s1 = prepare(insertTag);
+  sqlite3_bind_text(s1.statement, 1, name.c_str(), -1, SQLITE_STATIC);
+  sqlite3_step(s1.statement);
+
+  // Link the tag to the note.
+  const std::string link =
+      "INSERT OR IGNORE INTO note_tags (note_id, tag_id) "
+      "SELECT ?, id FROM tags WHERE name = ?";
+  auto s2 = prepare(link);
+  sqlite3_bind_int(s2.statement, 1, noteId);
+  sqlite3_bind_text(s2.statement, 2, name.c_str(), -1, SQLITE_STATIC);
+  if (sqlite3_step(s2.statement) != SQLITE_DONE) {
+    QN_LOG_WARN(
+        "Failed to add tag \"{}\" to id={}: {}", name, noteId,
+        sqlite3_errmsg(m_db)
+    );
+  }
+}
+
+void NotesRepository::removeTag(int noteId, const std::string &name) {
+  QN_LOG_DEBUG("removeTag id={} name=\"{}\"", noteId, name);
+  const std::string query =
+      "DELETE FROM note_tags WHERE note_id = ? AND "
+      "tag_id = (SELECT id FROM tags WHERE name = ?)";
+  auto s = prepare(query);
+  sqlite3_bind_int(s.statement, 1, noteId);
+  sqlite3_bind_text(s.statement, 2, name.c_str(), -1, SQLITE_STATIC);
+  if (sqlite3_step(s.statement) != SQLITE_DONE) {
+    QN_LOG_WARN(
+        "Failed to remove tag \"{}\" from id={}: {}", name, noteId,
+        sqlite3_errmsg(m_db)
+    );
+  }
+}
+
+std::vector<std::string> NotesRepository::getAllTags() {
+  const std::string query = "SELECT name FROM tags ORDER BY name";
+  auto s = prepare(query);
+  std::vector<std::string> tags;
+  while (sqlite3_step(s.statement) == SQLITE_ROW) {
+    tags.emplace_back(
+        reinterpret_cast<const char *>(sqlite3_column_text(s.statement, 0))
+    );
+  }
+  return tags;
+}
+
+std::vector<Model::Note> NotesRepository::findByTag(const std::string &tag) {
+  const std::string query =
+      std::string(BASE_SELECT) +
+      "WHERE n.id IN (SELECT nt2.note_id FROM note_tags nt2 "
+      "JOIN tags t2 ON nt2.tag_id = t2.id WHERE t2.name = ?) "
+      "GROUP BY n.id";
+  auto s = prepare(query);
+  sqlite3_bind_text(s.statement, 1, tag.c_str(), -1, SQLITE_STATIC);
+  return collect(s);
+}
 
 } // namespace QuickNotes::DB

@@ -18,7 +18,8 @@ namespace QuickNotes::App::State {
 /// Manages three sub-modes:
 /// - NORMAL: navigate the note list with cursor movement, open or delete notes.
 /// - SEARCH: filter notes in real time as the user types a query.
-/// - PREVIEW: scroll through the rendered markdown preview of the selected note.
+/// - PREVIEW: scroll through the rendered markdown preview of the selected
+/// note.
 ///
 /// Owns a NoteContainer widget that composites the list panel, preview panel,
 /// search bar, and status bar. Input is routed to one of handleNormal(),
@@ -57,7 +58,7 @@ class NoteListState : public NoteAwareState {
     std::string name() const override { return "NoteListState"; }
 
   private:
-    enum class Mode { NORMAL, SEARCH, PREVIEW };
+    enum class Mode { NORMAL, SEARCH, PREVIEW, VISUAL };
 
     enum class NormalAction {
       MOVE_UP,
@@ -68,29 +69,48 @@ class NoteListState : public NoteAwareState {
       NEW_NOTE,
       DELETE_NOTE,
       RENAME_NOTE,
+      PIN_NOTE,
+      TAG_NOTE,
+      VISUAL,
       QUIT,
       NONE,
     };
 
-    using Binding = std::pair<Config::Action, NormalAction>;
+    enum class VisualAction {
+      MOVE_UP,
+      MOVE_DOWN,
+      PIN,
+      ADD_TAG,
+      NONE,
+    };
+
+    using NormalBinding = std::pair<Config::Action, NormalAction>;
+    using VisualBinding = std::pair<Config::Action, VisualAction>;
     int m_selectedIndex;
+    int m_visualStart = 0;
     Mode m_mode = Mode::NORMAL;
     std::string m_query;
     std::string m_inputBuffer;
+    bool m_tagging = false;
+    bool m_tagFromVisual = false;
     std::vector<Model::Note> m_notes;
     std::vector<Model::Note> m_results;
     std::unique_ptr<UI::NoteContainer> m_view;
-    static const std::vector<Binding> m_keyMap;
+    static const std::vector<NormalBinding> m_normalKeyMap;
+    static const std::vector<VisualBinding> m_visualKeyMap;
     bool m_lastStateWasSearch = false;
     bool m_searchTyping = false;
 
     std::unique_ptr<AbstractState> handleNormal(int key);
     std::unique_ptr<AbstractState> handleSearch(int key);
     std::unique_ptr<AbstractState> handlePreview(int key);
+    std::unique_ptr<AbstractState> handleVisual(int key);
 
     void enterSearchMode();
     void exitSearchMode();
     void updateSearch();
+    void enterVisualMode();
+    void exitVisualMode();
 
     std::vector<Model::Note> &activeNotes();
     std::string_view modeLabel() const;
