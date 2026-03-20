@@ -92,17 +92,17 @@ italic_fg   = "#74C7EC"
 
 ## TODO (ordered by priority):
 
-- [ ] Note renaming.
+- [x] Note renaming.
 - [ ] Keybinding / more robust color configuration
 - [x] Search / filter through notes.
 - [ ] Fuzzy find within content of notes across all notes or within a single note.
-- [ ] Add tags, categories, and favorites.
+- [x] Add tags, categories, and favorites.
 - [ ] Note list custom ordering.
 - [ ] Parse/render links, arrows, and other markdown features (maybe not links).
 - [ ] Tree-sitter syntax highlighting for code blocks.
 - [ ] Importing/exporting notes.
 - [ ] Unit tests for configuration loading.
-- [ ] Unit Tests for the Database.
+- [x] Unit Tests for the Database.
 - [ ] Integration Tests for the States.
 
 ---
